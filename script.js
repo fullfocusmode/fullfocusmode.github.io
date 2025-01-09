@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedTaskId = null;
 
     // DOM Elements
+    let currentDate = new Date();
     const sidebar = document.getElementById('sidebar');
     const datetime = document.getElementById('datetime');
     const categorizedTasks = document.getElementById('categorizedTasks');
@@ -30,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskForm = document.getElementById('taskForm');
     const quickLinkForm = document.getElementById('quickLinkForm');
     const searchInput = document.getElementById('searchTasks');
+
+    cleanupCompletedTasks();
 
     // Modal close on outside click
     window.addEventListener('click', (e) => {
@@ -340,22 +343,61 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    function changeMonth(delta) {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1);
+        renderCalendar();
+    }
+    
+    // Updated showDayTasks function
     function showDayTasks(dateString) {
         const selectedDate = new Date(dateString);
-        const dayTasks = tasks.filter(task => {
-            const taskDate = new Date(task.startTime);
-            return taskDate.toDateString() === selectedDate.toDateString();
+        const dateStr = selectedDate.toDateString();
+        
+        const activeTasks = tasks.filter(task => {
+            return task.startTime && new Date(task.startTime).toDateString() === dateStr;
         });
-
+        
+        const completedTasksForDay = completedTasks[dateStr] || [];
+    
         document.getElementById('selectedDate').textContent = selectedDate.toLocaleDateString();
         const dayTasksDiv = document.getElementById('dayTasks');
         dayTasksDiv.innerHTML = '';
-
-        dayTasks.forEach(task => {
-            const taskElement = createTaskElement(task);
-            dayTasksDiv.appendChild(taskElement);
-        });
-
+    
+        // Add toggle button in modal
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'toggle-completed-btn';
+        toggleBtn.textContent = 'Toggle Completed Tasks';
+        toggleBtn.onclick = () => {
+            const showingCompleted = toggleBtn.classList.contains('active');
+            toggleBtn.classList.toggle('active');
+            renderDayTasks(showingCompleted ? activeTasks : completedTasksForDay);
+        };
+        dayTasksDiv.appendChild(toggleBtn);
+    
+        function renderDayTasks(tasksToShow) {
+            const tasksContainer = document.createElement('div');
+            tasksContainer.className = 'tasks-container';
+            
+            if (tasksToShow.length === 0) {
+                tasksContainer.innerHTML = '<p class="no-tasks">No tasks for this day</p>';
+            } else {
+                tasksToShow.forEach(task => {
+                    const taskElement = createTaskElement(task);
+                    tasksContainer.appendChild(taskElement);
+                });
+            }
+            
+            // Replace existing tasks container if it exists
+            const existingContainer = dayTasksDiv.querySelector('.tasks-container');
+            if (existingContainer) {
+                dayTasksDiv.replaceChild(tasksContainer, existingContainer);
+            } else {
+                dayTasksDiv.appendChild(tasksContainer);
+            }
+        }
+    
+        renderDayTasks(activeTasks);
         showModal('calendarModal');
     }
 
@@ -378,6 +420,19 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             container.appendChild(div);
         });
+    }
+
+    function cleanupCompletedTasks() {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        Object.keys(completedTasks).forEach(dateStr => {
+            if (new Date(dateStr) < thirtyDaysAgo) {
+                delete completedTasks[dateStr];
+            }
+        });
+        
+        saveCompletedTasks();
     }
 
     // Embed Management
@@ -463,13 +518,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Form submissions
+    // Add this to your task form submit handler
     taskForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const formData = {
             name: document.getElementById('taskName').value,
-            startTime: document.getElementById('startTime').value,
-            endTime: document.getElementById('endTime').value,
+            startTime: document.getElementById('startTime').value || null,
+            endTime: document.getElementById('endTime').value || null,
             description: document.getElementById('taskDescription').value,
             links: document.getElementById('taskLinks').value,
             priority: document.getElementById('taskPriority').value,
