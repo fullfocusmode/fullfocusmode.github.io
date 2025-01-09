@@ -1,9 +1,13 @@
 /* styles.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap');
+
 :root {
     --primary-color: #4a90e2;
     --secondary-color: #f5f5f5;
     --text-color: #333;
     --border-color: #ddd;
+    font-family: 'Syne', sans-serif;
 }
 
 * {
