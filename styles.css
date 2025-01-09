@@ -163,36 +163,54 @@ button.cancel {
 
 /* Task Items */
 .task-item {
-    padding: 10px;
-    margin-bottom: 10px;
+    position: relative;
+    padding: 15px;
+    margin-bottom: 15px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
 }
 
 .task-item.focused {
     border-color: var(--primary-color);
     background-color: rgba(74, 144, 226, 0.1);
 }
+
+.task-item.completed {
+    opacity: 0.7;
+    background-color: var(--secondary-color);
+}
+
+.task-item.priority-normal { border-left-color: #808080; }
+.task-item.priority-low { border-left-color: #00C851; }
+.task-item.priority-medium { border-left-color: #ffbb33; }
+.task-item.priority-high { border-left-color: #ff4444; }
+
 /* Additional styles for new features */
 
-/* Search Bar */
+/* Search Enhancement */
 .search-bar {
-    margin-bottom: 20px;
-    width: 100%;
-    max-width: 600px;
     position: relative;
+    flex: 1;
+    max-width: 400px;
+    margin: 0 20px;
 }
 
 .search-bar input {
-    padding-right: 40px;
+    width: 100%;
+    padding: 8px 35px 8px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
 }
 
 .search-bar i {
     position: absolute;
-    right: 10px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: #999;
+    pointer-events: none;
 }
 
 /* Task Priority */
@@ -214,7 +232,10 @@ button.cancel {
 
 /* Task Labels */
 .task-labels {
-    margin: 5px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 10px 0;
 }
 
 .task-label {
@@ -235,6 +256,27 @@ button.cancel {
 .task-completed {
     opacity: 0.6;
     text-decoration: line-through;
+}
+
+.label {
+    background-color: var(--secondary-color);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+}
+
+body.dark-mode .task-item {
+    background-color: #333333;
+    border-color: #404040;
+}
+
+body.dark-mode .label {
+    background-color: #404040;
+    color: #ffffff;
+}
+
+body.dark-mode .task-actions {
+    border-top-color: #404040;
 }
 
 /* Dark Mode */
@@ -266,7 +308,19 @@ body.dark-mode textarea {
 .task-actions {
     display: flex;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.task-actions button {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    border-radius: 4px;
+}
+
+.task-actions .delete {
+    background-color: #ff4444;
 }
 
 /* Notification Badge */
@@ -279,6 +333,19 @@ body.dark-mode textarea {
     border-radius: 50%;
     padding: 2px 6px;
     font-size: 0.8em;
+}
+
+/* Notification Styles */
+.notification-setting {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.notification-setting input[type="checkbox"] {
+    width: auto;
+    margin: 0;
 }
 
 /* Responsive Design */
