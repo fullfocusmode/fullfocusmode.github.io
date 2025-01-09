@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="closeSidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        <a href="dashboard.html" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="notes.html"><i class="fas fa-sticky-note"></i> Notes</a>
+        <a href="pomodoro.html"><i class="fas fa-clock"></i> Pomodoro</a>
+        <a href="calendar.html"><i class="fas fa-calendar"></i> Calendar</a>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>Dashboard Overview</h1>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="box stats">
+                <h2>Task Statistics</h2>
+                <div id="taskStats"></div>
+                <canvas id="taskChart"></canvas>
+            </div>
+
+            <div class="box productivity">
+                <h2>Productivity Score</h2>
+                <div class="score-circle">
+                    <span id="productivityScore">0</span>%
+                </div>
+                <div id="productivityTrend"></div>
+            </div>
+
+            <div class="box recent">
+                <h2>Recent Activity</h2>
+                <div id="recentActivity"></div>
+            </div>
+
+            <div class="box upcoming">
+                <h2>Upcoming Tasks</h2>
+                <div id="upcomingTasks"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
