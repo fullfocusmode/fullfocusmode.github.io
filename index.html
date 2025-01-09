@@ -15,6 +15,11 @@
             <button id="closeSidebar"><i class="fas fa-times"></i></button>
         </div>
         <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
+        <div class="webviewer-section">
+            <h4>Webviewer</h4>
+            <div id="embedList"></div>
+            <button id="addEmbed" class="btn-small">+ Add Embed</button>
+        </div>
         <div class="quick-links">
             <h4>Quick Links</h4>
             <div id="quickLinksList"></div>
@@ -26,7 +31,7 @@
     <div class="main-content">
         <div class="top-bar">
             <button id="openSidebar"><i class="fas fa-bars"></i></button>
-            <h1>FullFocus TaskViewer</h1>
+            <h1>FullFocus WebViewer</h1>
             <div class="search-bar">
                 <input type="text" id="searchTasks" placeholder="Search tasks...">
                 <i class="fas fa-search"></i>
@@ -121,6 +126,21 @@
             <form id="quickLinkForm">
                 <input type="text" id="linkName" placeholder="Link Name" required>
                 <input type="url" id="linkUrl" placeholder="URL" required>
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Embed Modal -->
+    <div id="embedModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Embed</h2>
+            <form id="embedForm">
+                <input type="text" id="embedName" placeholder="Name" required>
+                <input type="url" id="embedUrl" placeholder="URL" required>
                 <div class="modal-buttons">
                     <button type="submit">Save</button>
                     <button type="button" class="cancel">Cancel</button>
