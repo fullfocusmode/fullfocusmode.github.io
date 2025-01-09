@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus Calendar</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="closeSidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="notes.html"><i class="fas fa-sticky-note"></i> Notes</a>
+        <a href="pomodoro.html"><i class="fas fa-clock"></i> Pomodoro</a>
+        <a href="calendar.html" class="active"><i class="fas fa-calendar"></i> Calendar</a>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>Calendar</h1>
+            <div class="calendar-view-controls">
+                <button id="monthView" class="active"><i class="fas fa-calendar-alt"></i> Month</button>
+                <button id="weekView"><i class="fas fa-calendar-week"></i> Week</button>
+                <button id="dayView"><i class="fas fa-calendar-day"></i> Day</button>
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button id="prevPeriod"><i class="fas fa-chevron-left"></i></button>
+                <h2 id="currentPeriod"></h2>
+                <button id="nextPeriod"><i class="fas fa-chevron-right"></i></button>
+                <button id="todayBtn">Today</button>
+            </div>
+
+            <div id="calendarGrid" class="calendar-grid"></div>
+
+            <div id="eventDetails" class="event-details">
+                <h3>Events for <span id="selectedDate"></span></h3>
+                <div id="eventsList"></div>
+                <button id="addEventBtn" class="btn-primary">
+                    <i class="fas fa-plus"></i> Add Event
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <h2 id="eventModalTitle">Add Event</h2>
+            <form id="eventForm">
+                <input type="text" id="eventTitle" placeholder="Event Title" required>
+                <input type="datetime-local" id="eventStart" required>
+                <input type="datetime-local" id="eventEnd" required>
+                <textarea id="eventDescription" placeholder="Event Description"></textarea>
+                <select id="eventCategory">
+                    <option value="task">Task</option>
+                    <option value="meeting">Meeting</option>
+                    <option value="reminder">Reminder</option>
+                    <option value="deadline">Deadline</option>
+                </select>
+                <div class="color-picker">
+                    <label>Color:</label>
+                    <input type="color" id="eventColor" value="#4a90e2">
+                </div>
+                <div class="notification-setting">
+                    <input type="checkbox" id="eventNotification">
+                    <label for="eventNotification">Enable notifications</label>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="calendar.js"></script>
+</body>
+</html>
