@@ -406,7 +406,7 @@ body.dark-mode .toggle-completed-btn.active {
     position: relative;
     width: 60px;
     height: 30px;
-    background: #ccc;
+    background-color: #ccc;
     border-radius: 15px;
     padding: 0;
 }
@@ -422,9 +422,13 @@ body.dark-mode .toggle-completed-btn.active {
     transition: 0.3s;
 }
 
+.toggle-btn.active {
+    background-color: var(--primary-color);
+}
+
 .toggle-btn.active .toggle-slider {
-    left: 32px;
-    background: var(--primary-color);
+    transform: translateX(30px);
+    background-color: white;
 }
 
 .setting-item {
@@ -507,22 +511,37 @@ body.dark-mode .quick-link-item {
     background-color: var(--secondary-color);
 }
 
-/* Embed Viewer Modal */
 .embed-viewer {
     width: 90%;
-    max-width: 800px;
+    max-width: 900px;
     height: 80vh;
 }
 
 .embed-viewer #embedViewerContent {
-    height: calc(100% - 100px);
-    margin: 20px 0;
+    height: calc(100% - 60px);
+    margin-top: 20px;
 }
 
 .embed-viewer iframe {
     width: 100%;
     height: 100%;
     border: none;
+}
+
+.embed-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+    pointer-events: none;
+    display: none;
+}
+
+.embed-item:hover .embed-tooltip {
+    display: block;
 }
 
 /* Calendar Styling */
@@ -663,6 +682,27 @@ body.dark-mode .quick-link-item {
 .toggle-completed-btn.active {
     background: var(--primary-color);
     color: white;
+}
+
+.data-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-danger {
+    background-color: #ff4444;
+    color: white;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 /* Responsive Design */
