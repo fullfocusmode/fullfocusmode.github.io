@@ -123,6 +123,14 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal.active {
+    opacity: 1;
+    visibility: visible;
 }
 
 .modal-content {
@@ -132,6 +140,8 @@ body {
     margin: 50px auto;
     padding: 20px;
     border-radius: 8px;
+    transform: translateY(-20px);
+    transition: transform 0.3s;
 }
 
 /* Forms */
@@ -258,6 +268,10 @@ button.cancel {
     text-decoration: line-through;
 }
 
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
 .label {
     background-color: var(--secondary-color);
     padding: 2px 8px;
@@ -346,6 +360,56 @@ body.dark-mode textarea {
 .notification-setting input[type="checkbox"] {
     width: auto;
     margin: 0;
+}
+
+.quick-link-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.quick-link-item a {
+    text-decoration: none;
+    color: var(--primary-color);
+    flex-grow: 1;
+}
+
+.delete-link,
+.delete-embed {
+    background: transparent;
+    color: #ff4444;
+    padding: 4px 8px;
+}
+
+/* Dark mode additions */
+body.dark-mode .embed-controls {
+    background-color: #333333;
+}
+
+body.dark-mode .quick-link-item {
+    border-color: #404040;
+}
+
+.webviewer-section {
+    margin-top: 20px;
+    padding: 10px 0;
+}
+
+.embed-item {
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.embed-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background-color: var(--secondary-color);
 }
 
 /* Responsive Design */
