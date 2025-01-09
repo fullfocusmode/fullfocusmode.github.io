@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     let quickLinks = JSON.parse(localStorage.getItem('quickLinks')) || [];
     let embeds = JSON.parse(localStorage.getItem('embeds')) || [];
+    let completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || {};
     let selectedTaskId = null;
 
     // DOM Elements
@@ -82,6 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(updateDateTime, 1000);
     }
     updateDateTime();
+
+    function saveCompletedTasks() {
+        localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+    }
+    
     // Task Management
     function addTask(task) {
         if (selectedTaskId) {
@@ -101,21 +107,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTasks(filteredTasks = tasks) {
         const now = new Date();
+        const today = new Date().toDateString();
         
         categorizedTasks.innerHTML = '';
         uncategorizedTasks.innerHTML = '';
-
-        filteredTasks.forEach(task => {
+    
+        // Add toggle button for completed tasks
+        const toggleButton = document.createElement('button');
+        toggleButton.className = 'toggle-completed-btn';
+        toggleButton.innerHTML = '<i class="fas fa-exchange-alt"></i> Toggle Completed Tasks';
+        toggleButton.onclick = toggleCompletedTasksView;
+        categorizedTasks.appendChild(toggleButton);
+    
+        // Sort tasks by date and time
+        const sortedTasks = filteredTasks.sort((a, b) => {
+            if (!a.startTime) return 1;
+            if (!b.startTime) return -1;
+            return new Date(a.startTime) - new Date(b.startTime);
+        });
+    
+        sortedTasks.forEach(task => {
+            if (task.completed) return; // Skip completed tasks in main view
+            
             const taskElement = createTaskElement(task);
             
-            if (task.startTime && task.endTime) {
+            if (task.startTime) {
                 const start = new Date(task.startTime);
-                const end = new Date(task.endTime);
-                
-                if (now >= start && now <= end) {
+                if (now >= start && (!task.endTime || now <= new Date(task.endTime))) {
                     taskElement.classList.add('focused');
                 }
-                
                 categorizedTasks.appendChild(taskElement);
             } else {
                 uncategorizedTasks.appendChild(taskElement);
@@ -192,51 +212,134 @@ document.addEventListener('DOMContentLoaded', () => {
         div.appendChild(actions);
         return div;
     }
-    // Calendar Functionality
+
+    function toggleCompletedTasksView() {
+        const today = new Date().toDateString();
+        const completedForToday = completedTasks[today] || [];
+        
+        if (categorizedTasks.classList.contains('showing-completed')) {
+            renderTasks(); // Switch back to normal view
+            categorizedTasks.classList.remove('showing-completed');
+        } else {
+            categorizedTasks.innerHTML = '';
+            const toggleButton = document.createElement('button');
+            toggleButton.className = 'toggle-completed-btn active';
+            toggleButton.innerHTML = '<i class="fas fa-exchange-alt"></i> Show Active Tasks';
+            toggleButton.onclick = toggleCompletedTasksView;
+            categorizedTasks.appendChild(toggleButton);
+    
+            completedForToday.forEach(task => {
+                const taskElement = createTaskElement(task);
+                taskElement.classList.add('completed');
+                categorizedTasks.appendChild(taskElement);
+            });
+            categorizedTasks.classList.add('showing-completed');
+        }
+    }
+
+    function toggleTaskComplete(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+    
+        const today = new Date().toDateString();
+        if (!completedTasks[today]) {
+            completedTasks[today] = [];
+        }
+    
+        if (!task.completed) {
+            // Mark as completed and move to completed tasks
+            task.completed = true;
+            completedTasks[today].push({...task});
+            tasks = tasks.filter(t => t.id !== taskId);
+        } else {
+            // Move back to active tasks
+            task.completed = false;
+            completedTasks[today] = completedTasks[today].filter(t => t.id !== taskId);
+            tasks.push({...task});
+        }
+    
+        saveTasks();
+        saveCompletedTasks();
+        renderTasks();
+    }
+    
+    // Updated Calendar Functionality
     function renderCalendar() {
         const calendarDiv = document.getElementById('calendar');
         const today = new Date();
         const currentMonth = today.getMonth();
         const currentYear = today.getFullYear();
-
+    
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+                           "July", "August", "September", "October", "November", "December"];
+    
+        let calendarHTML = `
+            <div class="calendar-navigation">
+                <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                <h3>${monthNames[currentMonth]} ${currentYear}</h3>
+                <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid">
+                <div class="calendar-header">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+        `;
+    
         const firstDay = new Date(currentYear, currentMonth, 1);
         const lastDay = new Date(currentYear, currentMonth + 1, 0);
-
-        let calendarHTML = '<div class="calendar-grid">';
-        calendarHTML += '<div class="calendar-header">Sun Mon Tue Wed Thu Fri Sat</div>';
-
-        for (let i = 0; i < firstDay.getDay(); i++) {
-            calendarHTML += '<div class="calendar-day empty"></div>';
+        const daysInMonth = lastDay.getDate();
+        const startingDay = firstDay.getDay();
+    
+        let dayCount = 1;
+        const weeks = Math.ceil((daysInMonth + startingDay) / 7);
+    
+        for (let week = 0; week < weeks; week++) {
+            calendarHTML += '<div class="calendar-week">';
+            for (let day = 0; day < 7; day++) {
+                if ((week === 0 && day < startingDay) || dayCount > daysInMonth) {
+                    calendarHTML += '<div class="calendar-day empty"></div>';
+                } else {
+                    const date = new Date(currentYear, currentMonth, dayCount);
+                    const isToday = date.toDateString() === today.toDateString();
+                    const hasTask = tasks.some(task => task.startTime && 
+                        new Date(task.startTime).toDateString() === date.toDateString());
+                    const hasCompleted = completedTasks[date.toDateString()]?.length > 0;
+    
+                    calendarHTML += `
+                        <div class="calendar-day ${isToday ? 'today' : ''} 
+                                               ${hasTask ? 'has-task' : ''} 
+                                               ${hasCompleted ? 'has-completed' : ''}"
+                             data-date="${date.toISOString().split('T')[0]}">
+                            <span class="day-number">${dayCount}</span>
+                            ${hasTask ? '<span class="task-indicator"></span>' : ''}
+                            ${hasCompleted ? '<span class="completed-indicator"></span>' : ''}
+                        </div>`;
+                    dayCount++;
+                }
+            }
+            calendarHTML += '</div>';
         }
-
-        for (let day = 1; day <= lastDay.getDate(); day++) {
-            const date = new Date(currentYear, currentMonth, day);
-            const hasTask = tasks.some(task => {
-                const taskDate = new Date(task.startTime);
-                return taskDate.toDateString() === date.toDateString();
-            });
-
-            calendarHTML += `
-                <div class="calendar-day ${hasTask ? 'has-task' : ''}" 
-                     data-date="${date.toISOString().split('T')[0]}">
-                    ${day}
-                </div>`;
-        }
-
+    
         calendarHTML += '</div>';
         calendarDiv.innerHTML = calendarHTML;
-
-        // Add click handlers for calendar days
-        document.querySelectorAll('.calendar-day').forEach(day => {
-            if (!day.classList.contains('empty')) {
-                day.addEventListener('click', () => {
-                    const dateStr = day.getAttribute('data-date');
-                    showDayTasks(dateStr);
-                });
-            }
+    
+        // Add event listeners for calendar navigation and day clicks
+        document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+        document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+        
+        document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
+            day.addEventListener('click', () => {
+                const dateStr = day.getAttribute('data-date');
+                showDayTasks(dateStr);
+            });
         });
     }
-
     function showDayTasks(dateString) {
         const selectedDate = new Date(dateString);
         const dayTasks = tasks.filter(task => {
