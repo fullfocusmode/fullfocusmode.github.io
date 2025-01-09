@@ -289,9 +289,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const div = document.createElement('div');
             div.className = 'embed-item';
             div.innerHTML = `
-                <iframe src="${embed.url}" title="${embed.name}" width="100%" height="300"></iframe>
                 <div class="embed-controls">
                     <span>${embed.name}</span>
+                    <button class="view-embed btn-small" data-id="${embed.id}">
+                        <i class="fas fa-eye"></i>
+                    </button>
                     <button class="delete-embed btn-small" data-id="${embed.id}">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -299,7 +301,33 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             container.appendChild(div);
         });
-    }
+
+    // Add event listeners for viewing embeds
+    document.querySelectorAll('.view-embed').forEach(button => {
+        button.addEventListener('click', () => {
+            const embedId = button.getAttribute('data-id');
+            const embed = embeds.find(e => e.id == embedId);
+            if (embed) {
+                document.getElementById('embedViewerTitle').textContent = embed.name;
+                document.getElementById('embedViewerContent').innerHTML = 
+                    `<iframe src="${embed.url}" title="${embed.name}" width="100%" height="100%"></iframe>`;
+                showModal('embedViewerModal');
+            }
+        });
+    });
+
+    // Add event listeners for deleting embeds
+    document.querySelectorAll('.delete-embed').forEach(button => {
+        button.addEventListener('click', () => {
+            const embedId = button.getAttribute('data-id');
+            if (confirm('Are you sure you want to delete this embed?')) {
+                embeds = embeds.filter(e => e.id != embedId);
+                saveEmbeds();
+                renderEmbeds();
+            }
+        });
+    });
+    
     // Notification System
     function checkNotifications() {
         const now = new Date();
