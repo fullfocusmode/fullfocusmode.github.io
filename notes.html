@@ -45,5 +45,20 @@
     </div>
 
     <script src="notes.js"></script>
+    <script>
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('sidebarContainer').innerHTML = data;
+                // Update active state based on current page
+                const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+                document.querySelectorAll('#sidebar a').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === currentPage) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+    </script>
 </body>
 </html>
