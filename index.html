@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +27,10 @@
         <div class="top-bar">
             <button id="openSidebar"><i class="fas fa-bars"></i></button>
             <h1>FullFocus TaskViewer</h1>
+            <div class="search-bar">
+                <input type="text" id="searchTasks" placeholder="Search tasks...">
+                <i class="fas fa-search"></i>
+            </div>
             <button id="settingsBtn"><i class="fas fa-cog"></i></button>
         </div>
 
@@ -54,7 +57,7 @@
         <button id="addTaskBtn" class="floating-btn">+ Add New Task</button>
     </div>
 
-    <!-- Modals -->
+    <!-- Task Modal -->
     <div id="taskModal" class="modal">
         <div class="modal-content">
             <h2>Add New Task</h2>
@@ -64,6 +67,16 @@
                 <input type="datetime-local" id="endTime">
                 <textarea id="taskDescription" placeholder="Description"></textarea>
                 <input type="text" id="taskLinks" placeholder="Links (comma-separated)">
+                <select id="taskPriority" required>
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                </select>
+                <input type="text" id="taskLabels" placeholder="Labels (comma-separated)">
+                <div class="notification-setting">
+                    <input type="checkbox" id="taskNotifications">
+                    <label for="taskNotifications">Enable notifications</label>
+                </div>
                 <div class="modal-buttons">
                     <button type="submit">Save</button>
                     <button type="button" class="cancel">Cancel</button>
@@ -72,11 +85,18 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <h2>Settings</h2>
-            <button id="exportData">Export Data</button>
-            <div class="file-upload">
+            <div class="setting-item">
+                <label>Dark Mode</label>
+                <button id="darkModeToggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+            </div>
+            <div class="setting-item">
+                <button id="exportData">Export Data</button>
+            </div>
+            <div class="setting-item file-upload">
                 <label for="importData">Import Data:</label>
                 <input type="file" id="importData" accept=".txt">
             </div>
@@ -84,6 +104,7 @@
         </div>
     </div>
 
+    <!-- Calendar Modal -->
     <div id="calendarModal" class="modal">
         <div class="modal-content">
             <h2>Tasks for <span id="selectedDate"></span></h2>
@@ -92,6 +113,7 @@
         </div>
     </div>
 
+    <!-- Quick Link Modal -->
     <div id="quickLinkModal" class="modal">
         <div class="modal-content">
             <h2>Add Quick Link</h2>
