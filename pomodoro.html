@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus Pomodoro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="closeSidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="notes.html"><i class="fas fa-sticky-note"></i> Notes</a>
+        <a href="pomodoro.html" class="active"><i class="fas fa-clock"></i> Pomodoro</a>
+        <a href="calendar.html"><i class="fas fa-calendar"></i> Calendar</a>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>Pomodoro Timer</h1>
+        </div>
+
+        <div class="pomodoro-container">
+            <div class="timer-display">
+                <div class="time">25:00</div>
+                <div class="phase">Work Time</div>
+            </div>
+
+            <div class="timer-controls">
+                <button id="startTimer" class="btn-primary"><i class="fas fa-play"></i> Start</button>
+                <button id="pauseTimer" class="btn-primary" disabled><i class="fas fa-pause"></i> Pause</button>
+                <button id="resetTimer" class="btn-primary"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+
+            <div class="timer-settings">
+                <div class="setting">
+                    <label>Work Duration (minutes)</label>
+                    <input type="number" id="workDuration" value="25" min="1" max="60">
+                </div>
+                <div class="setting">
+                    <label>Break Duration (minutes)</label>
+                    <input type="number" id="breakDuration" value="5" min="1" max="30">
+                </div>
+                <div class="setting">
+                    <label>Long Break Duration (minutes)</label>
+                    <input type="number" id="longBreakDuration" value="15" min="1" max="60">
+                </div>
+                <div class="setting">
+                    <label>Sessions until Long Break</label>
+                    <input type="number" id="sessionsCount" value="4" min="1" max="10">
+                </div>
+            </div>
+
+            <div class="session-stats">
+                <h3>Today's Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="completedSessions">0</span>
+                        <span class="stat-label">Completed Sessions</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalFocusTime">0</span>
+                        <span class="stat-label">Minutes Focused</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="pomodoro.js"></script>
+</body>
+</html>
