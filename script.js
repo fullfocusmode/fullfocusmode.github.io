@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // State management
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     let quickLinks = JSON.parse(localStorage.getItem('quickLinks')) || [];
+    let embeds = JSON.parse(localStorage.getItem('embeds')) || [];
     let selectedTaskId = null; // Track currently edited task
 
     // DOM Elements
@@ -14,6 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const quickLinkForm = document.getElementById('quickLinkForm');
     const searchInput = document.getElementById('searchTasks');
 
+    document.getElementById('quickLinkForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('linkName').value;
+        const url = document.getElementById('linkUrl').value;
+        quickLinks.push({ id: Date.now(), name, url });
+        saveQuickLinks();
+        renderQuickLinks();
+        hideModal('quickLinkModal');
+        e.target.reset();
+    });
+    
     // Update datetime
     function updateDateTime() {
         const now = new Date();
@@ -21,6 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(updateDateTime, 1000);
     }
     updateDateTime();
+
+    // Quick Links functionality
+    document.getElementById('addQuickLink').addEventListener('click', () => {
+        showModal('quickLinkModal');
+    });
+
+    function saveQuickLinks() {
+        localStorage.setItem('quickLinks', JSON.stringify(quickLinks));
+    }
 
     // Sidebar toggle
     document.getElementById('openSidebar').addEventListener('click', () => {
@@ -43,6 +64,41 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTasks();
         renderCalendar();
     }
+
+    // Setup modal close buttons
+    document.querySelectorAll('.modal .cancel').forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            hideModal(modal.id);
+        });
+    });
+
+    // Settings functionality
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+        showModal('settingsModal');
+    });
+
+    // Add Task button
+    document.getElementById('addTaskBtn').addEventListener('click', () => {
+        selectedTaskId = null;
+        document.getElementById('taskForm').reset();
+        showModal('taskModal');
+    });
+
+    function renderQuickLinks() {
+        const container = document.getElementById('quickLinksList');
+        container.innerHTML = '';
+        quickLinks.forEach(link => {
+            const div = document.createElement('div');
+            div.className = 'quick-link-item';
+            div.innerHTML = `
+                <a href="${link.url}" target="_blank">${link.name}</a>
+                <button class="delete-link btn-small" data-id="${link.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        });
 
     function saveTasks() {
         localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -71,6 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 uncategorizedTasks.appendChild(taskElement);
             }
         });
+    }
+
+    // Modal functions
+    function showModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function hideModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
     }
 
     function createTaskElement(task) {
@@ -278,8 +343,48 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(checkNotifications, 60000);
     }
 
+    // Embed functionality
+    document.getElementById('addEmbed').addEventListener('click', () => {
+        showModal('embedModal');
+    });
+
+    function saveEmbeds() {
+        localStorage.setItem('embeds', JSON.stringify(embeds));
+    }
+
+    function renderEmbeds() {
+        const container = document.getElementById('embedList');
+        container.innerHTML = '';
+        embeds.forEach(embed => {
+            const div = document.createElement('div');
+            div.className = 'embed-item';
+            div.innerHTML = `
+                <iframe src="${embed.url}" title="${embed.name}" width="100%" height="300"></iframe>
+                <div class="embed-controls">
+                    <span>${embed.name}</span>
+                    <button class="delete-embed btn-small" data-id="${embed.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    document.getElementById('embedForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('embedName').value;
+        const url = document.getElementById('embedUrl').value;
+        embeds.push({ id: Date.now(), name, url });
+        saveEmbeds();
+        renderEmbeds();
+        hideModal('embedModal');
+        e.target.reset();
+    });
+
     // Initial render
     renderTasks();
     renderQuickLinks();
     renderCalendar();
+    renderEmbeds();
 });
