@@ -14,10 +14,11 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Syne', sans-serif;
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Syne', sans-serif;
     line-height: 1.6;
     color: var(--text-color);
 }
