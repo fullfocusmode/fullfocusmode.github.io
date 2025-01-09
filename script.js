@@ -146,6 +146,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Export data functionality
+    function initDataManagement() {
+        document.getElementById('exportData').addEventListener('click', () => {
+            const data = {
+                tasks: JSON.parse(localStorage.getItem('tasks') || '[]'),
+                quickLinks: JSON.parse(localStorage.getItem('quickLinks') || '[]'),
+                embeds: JSON.parse(localStorage.getItem('embeds') || '[]'),
+                completedTasks: JSON.parse(localStorage.getItem('completedTasks') || '{}')
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fullfocus_backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    
+        // Clear data functionality
+        document.getElementById('clearData').addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                localStorage.clear();
+                location.reload();
+            }
+        });
+    }
+
+    // Dark mode toggle
+    function initDarkMode() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.classList.add('active');
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            darkModeToggle.classList.toggle('active');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+    }
+
     function createTaskElement(task) {
         const div = document.createElement('div');
         div.className = `task-item ${task.completed ? 'completed' : ''} priority-${task.priority || 'normal'}`;
@@ -435,6 +482,54 @@ document.addEventListener('DOMContentLoaded', () => {
         saveCompletedTasks();
     }
 
+    // Task form submission
+    function initTaskForm() {
+        const taskForm = document.getElementById('taskForm');
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const task = {
+                id: Date.now(),
+                name: document.getElementById('taskName').value,
+                startTime: document.getElementById('startTime').value || null,
+                endTime: document.getElementById('endTime').value || null,
+                description: document.getElementById('taskDescription').value,
+                links: document.getElementById('taskLinks').value,
+                priority: document.getElementById('taskPriority').value,
+                labels: document.getElementById('taskLabels').value.split(',')
+                    .map(label => label.trim())
+                    .filter(label => label),
+                notifications: document.getElementById('taskNotifications').checked
+            };
+    
+            const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+            tasks.push(task);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            renderTasks();
+            hideModal('taskModal');
+            taskForm.reset();
+        });
+    }
+
+    // Embed viewer functionality
+    function initEmbedViewer() {
+        document.querySelectorAll('.view-embed').forEach(button => {
+            button.addEventListener('click', () => {
+                const embedId = button.getAttribute('data-id');
+                const embeds = JSON.parse(localStorage.getItem('embeds') || '[]');
+                const embed = embeds.find(e => e.id == embedId);
+                
+                if (embed) {
+                    document.getElementById('embedViewerTitle').textContent = embed.name;
+                    document.getElementById('embedViewerContent').innerHTML = 
+                        `<iframe src="${embed.url}" title="${embed.name}"></iframe>`;
+                    showModal('embedViewerModal');
+                }
+            });
+        });
+    }
+    
     // Embed Management
     function saveEmbeds() {
         localStorage.setItem('embeds', JSON.stringify(embeds));
@@ -669,8 +764,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initial render
+    initDarkMode();
+    initDataManagement();
+    initTaskForm();
+    initEmbedViewer();
     renderTasks();
-    renderQuickLinks();
     renderCalendar();
-    renderEmbeds();
 }})
