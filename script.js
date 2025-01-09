@@ -129,13 +129,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Modal functions
     function showModal(modalId) {
-        document.getElementById(modalId).style.display = 'block';
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'block';
+        }
     }
-
+    
     function hideModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
     }
 
     function createTaskElement(task) {
