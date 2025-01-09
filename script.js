@@ -1,9 +1,24 @@
+// Global modal functions
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // State management
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     let quickLinks = JSON.parse(localStorage.getItem('quickLinks')) || [];
     let embeds = JSON.parse(localStorage.getItem('embeds')) || [];
-    let selectedTaskId = null; // Track currently edited task
+    let selectedTaskId = null;
 
     // DOM Elements
     const sidebar = document.getElementById('sidebar');
@@ -15,33 +30,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const quickLinkForm = document.getElementById('quickLinkForm');
     const searchInput = document.getElementById('searchTasks');
 
-    document.getElementById('quickLinkForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('linkName').value;
-        const url = document.getElementById('linkUrl').value;
-        quickLinks.push({ id: Date.now(), name, url });
-        saveQuickLinks();
-        renderQuickLinks();
-        hideModal('quickLinkModal');
-        e.target.reset();
+    // Modal close on outside click
+    window.addEventListener('click', (e) => {
+        document.querySelectorAll('.modal').forEach(modal => {
+            if (e.target === modal) {
+                hideModal(modal.id);
+            }
+        });
     });
-    
-    // Update datetime
-    function updateDateTime() {
-        const now = new Date();
-        datetime.textContent = now.toLocaleString();
-        setTimeout(updateDateTime, 1000);
-    }
-    updateDateTime();
 
-    // Quick Links functionality
+    // Modal buttons
+    document.querySelectorAll('.modal .cancel').forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            hideModal(modal.id);
+        });
+    });
+
+    // Button event listeners
     document.getElementById('addQuickLink').addEventListener('click', () => {
         showModal('quickLinkModal');
     });
 
-    function saveQuickLinks() {
-        localStorage.setItem('quickLinks', JSON.stringify(quickLinks));
-    }
+    document.getElementById('addTaskBtn').addEventListener('click', () => {
+        selectedTaskId = null;
+        document.getElementById('taskForm').reset();
+        showModal('taskModal');
+    });
+
+    document.getElementById('addEmbed').addEventListener('click', () => {
+        showModal('embedModal');
+    });
+
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+        showModal('settingsModal');
+    });
 
     // Sidebar toggle
     document.getElementById('openSidebar').addEventListener('click', () => {
@@ -52,6 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.remove('active');
     });
 
+    // Update datetime
+    function updateDateTime() {
+        const now = new Date();
+        datetime.textContent = now.toLocaleString();
+        setTimeout(updateDateTime, 1000);
+    }
+    updateDateTime();
     // Task Management
     function addTask(task) {
         if (selectedTaskId) {
@@ -65,41 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCalendar();
     }
 
-    // Setup modal close buttons
-    document.querySelectorAll('.modal .cancel').forEach(button => {
-        button.addEventListener('click', () => {
-            const modal = button.closest('.modal');
-            hideModal(modal.id);
-        });
-    });
-
-    // Settings functionality
-    document.getElementById('settingsBtn').addEventListener('click', () => {
-        showModal('settingsModal');
-    });
-
-    // Add Task button
-    document.getElementById('addTaskBtn').addEventListener('click', () => {
-        selectedTaskId = null;
-        document.getElementById('taskForm').reset();
-        showModal('taskModal');
-    });
-
-    function renderQuickLinks() {
-        const container = document.getElementById('quickLinksList');
-        container.innerHTML = '';
-        quickLinks.forEach(link => {
-            const div = document.createElement('div');
-            div.className = 'quick-link-item';
-            div.innerHTML = `
-                <a href="${link.url}" target="_blank">${link.name}</a>
-                <button class="delete-link btn-small" data-id="${link.id}">
-                    <i class="fas fa-trash"></i>
-                </button>
-            `;
-            container.appendChild(div);
-        });
-
     function saveTasks() {
         localStorage.setItem('tasks', JSON.stringify(tasks));
     }
@@ -107,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTasks(filteredTasks = tasks) {
         const now = new Date();
         
-        // Clear containers
         categorizedTasks.innerHTML = '';
         uncategorizedTasks.innerHTML = '';
 
@@ -127,20 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 uncategorizedTasks.appendChild(taskElement);
             }
         });
-    }
-
-    function showModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'block';
-        }
-    }
-    
-    function hideModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'none';
-        }
     }
 
     function createTaskElement(task) {
@@ -178,23 +158,19 @@ document.addEventListener('DOMContentLoaded', () => {
             details.appendChild(labels);
         }
 
-        // Action buttons container
         const actions = document.createElement('div');
         actions.className = 'task-actions';
 
-        // Complete toggle
         const completeBtn = document.createElement('button');
         completeBtn.textContent = task.completed ? 'Undo' : 'Complete';
         completeBtn.className = 'btn-small';
         completeBtn.onclick = () => toggleTaskComplete(task.id);
         
-        // Edit button
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
         editBtn.className = 'btn-small';
         editBtn.onclick = () => editTask(task.id);
 
-        // Delete button
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
         deleteBtn.className = 'btn-small delete';
@@ -216,8 +192,197 @@ document.addEventListener('DOMContentLoaded', () => {
         div.appendChild(actions);
         return div;
     }
+    // Calendar Functionality
+    function renderCalendar() {
+        const calendarDiv = document.getElementById('calendar');
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+
+        let calendarHTML = '<div class="calendar-grid">';
+        calendarHTML += '<div class="calendar-header">Sun Mon Tue Wed Thu Fri Sat</div>';
+
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            calendarHTML += '<div class="calendar-day empty"></div>';
+        }
+
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const date = new Date(currentYear, currentMonth, day);
+            const hasTask = tasks.some(task => {
+                const taskDate = new Date(task.startTime);
+                return taskDate.toDateString() === date.toDateString();
+            });
+
+            calendarHTML += `
+                <div class="calendar-day ${hasTask ? 'has-task' : ''}" 
+                     data-date="${date.toISOString().split('T')[0]}">
+                    ${day}
+                </div>`;
+        }
+
+        calendarHTML += '</div>';
+        calendarDiv.innerHTML = calendarHTML;
+
+        // Add click handlers for calendar days
+        document.querySelectorAll('.calendar-day').forEach(day => {
+            if (!day.classList.contains('empty')) {
+                day.addEventListener('click', () => {
+                    const dateStr = day.getAttribute('data-date');
+                    showDayTasks(dateStr);
+                });
+            }
+        });
+    }
+
+    function showDayTasks(dateString) {
+        const selectedDate = new Date(dateString);
+        const dayTasks = tasks.filter(task => {
+            const taskDate = new Date(task.startTime);
+            return taskDate.toDateString() === selectedDate.toDateString();
+        });
+
+        document.getElementById('selectedDate').textContent = selectedDate.toLocaleDateString();
+        const dayTasksDiv = document.getElementById('dayTasks');
+        dayTasksDiv.innerHTML = '';
+
+        dayTasks.forEach(task => {
+            const taskElement = createTaskElement(task);
+            dayTasksDiv.appendChild(taskElement);
+        });
+
+        showModal('calendarModal');
+    }
+
+    // Quick Links functionality
+    function saveQuickLinks() {
+        localStorage.setItem('quickLinks', JSON.stringify(quickLinks));
+    }
+
+    function renderQuickLinks() {
+        const container = document.getElementById('quickLinksList');
+        container.innerHTML = '';
+        quickLinks.forEach(link => {
+            const div = document.createElement('div');
+            div.className = 'quick-link-item';
+            div.innerHTML = `
+                <a href="${link.url}" target="_blank">${link.name}</a>
+                <button class="delete-link btn-small" data-id="${link.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // Embed Management
+    function saveEmbeds() {
+        localStorage.setItem('embeds', JSON.stringify(embeds));
+    }
+
+    function renderEmbeds() {
+        const container = document.getElementById('embedList');
+        container.innerHTML = '';
+        embeds.forEach(embed => {
+            const div = document.createElement('div');
+            div.className = 'embed-item';
+            div.innerHTML = `
+                <iframe src="${embed.url}" title="${embed.name}" width="100%" height="300"></iframe>
+                <div class="embed-controls">
+                    <span>${embed.name}</span>
+                    <button class="delete-embed btn-small" data-id="${embed.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+    // Notification System
+    function checkNotifications() {
+        const now = new Date();
+        tasks.forEach(task => {
+            if (task.notifications && !task.notified && !task.completed) {
+                const startTime = new Date(task.startTime);
+                const timeDiff = startTime - now;
+                
+                if (timeDiff > 0 && timeDiff <= 900000) {
+                    showNotification(task);
+                    task.notified = true;
+                    saveTasks();
+                }
+            }
+        });
+    }
+
+    function showNotification(task) {
+        if (Notification.permission === "granted") {
+            new Notification(`Task Starting Soon: ${task.name}`, {
+                body: `Starting in ${Math.round((new Date(task.startTime) - new Date()) / 60000)} minutes`,
+                icon: 'favicon.png'
+            });
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    showNotification(task);
+                }
+            });
+        }
+    }
+
+    // Form submissions
+    taskForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = {
+            name: document.getElementById('taskName').value,
+            startTime: document.getElementById('startTime').value,
+            endTime: document.getElementById('endTime').value,
+            description: document.getElementById('taskDescription').value,
+            links: document.getElementById('taskLinks').value,
+            priority: document.getElementById('taskPriority').value,
+            labels: document.getElementById('taskLabels').value.split(',')
+                .map(label => label.trim())
+                .filter(label => label),
+            completed: false,
+            notifications: document.getElementById('taskNotifications').checked,
+            notified: false
+        };
+        
+        addTask(formData);
+        taskForm.reset();
+        hideModal('taskModal');
+    });
+
+    quickLinkForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('linkName').value;
+        const url = document.getElementById('linkUrl').value;
+        quickLinks.push({ id: Date.now(), name, url });
+        saveQuickLinks();
+        renderQuickLinks();
+        hideModal('quickLinkModal');
+        e.target.reset();
+    });
+
+    document.getElementById('embedForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('embedName').value;
+        const url = document.getElementById('embedUrl').value;
+        embeds.push({ id: Date.now(), name, url });
+        saveEmbeds();
+        renderEmbeds();
+        hideModal('embedModal');
+        e.target.reset();
+    });
 
     // Search functionality
+    searchInput.addEventListener('input', (e) => {
+        const searchResults = searchTasks(e.target.value);
+        renderTasks(searchResults);
+    });
+
     function searchTasks(query) {
         const searchTerm = query.toLowerCase();
         return tasks.filter(task => 
@@ -227,6 +392,50 @@ document.addEventListener('DOMContentLoaded', () => {
             false
         );
     }
+
+    // Export/Import Functionality
+    document.getElementById('exportData').addEventListener('click', () => {
+        const data = {
+            tasks,
+            quickLinks,
+            embeds
+        };
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'fullfocus_backup.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('importData').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    tasks = data.tasks || [];
+                    quickLinks = data.quickLinks || [];
+                    embeds = data.embeds || [];
+                    saveTasks();
+                    saveQuickLinks();
+                    saveEmbeds();
+                    renderTasks();
+                    renderQuickLinks();
+                    renderEmbeds();
+                    renderCalendar();
+                    alert('Data imported successfully!');
+                } catch (error) {
+                    alert('Error importing data: Invalid file format');
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
 
     // Task editing
     function editTask(taskId) {
@@ -258,79 +467,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Dark mode toggle
-    function toggleDarkMode() {
+    document.getElementById('darkModeToggle').addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
         localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    }
-
-    // Notification handling
-    function checkNotifications() {
-        const now = new Date();
-        tasks.forEach(task => {
-            if (task.notifications && !task.notified && !task.completed) {
-                const startTime = new Date(task.startTime);
-                const timeDiff = startTime - now;
-                
-                // Notify 15 minutes before task starts
-                if (timeDiff > 0 && timeDiff <= 900000) {
-                    showNotification(task);
-                    task.notified = true;
-                    saveTasks();
-                }
-            }
-        });
-    }
-
-    function showNotification(task) {
-        if (Notification.permission === "granted") {
-            new Notification(`Task Starting Soon: ${task.name}`, {
-                body: `Starting in ${Math.round((new Date(task.startTime) - new Date()) / 60000)} minutes`,
-                icon: '/favicon.ico'
-            });
-        } else if (Notification.permission !== "denied") {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    showNotification(task);
-                }
-            });
-        }
-    }
-
-    // Calendar rendering (previous implementation remains the same)
-    function renderCalendar() {
-        // ... (previous calendar code remains unchanged)
-    }
-
-    function showDayTasks(dateString) {
-        // ... (previous showDayTasks code remains unchanged)
-    }
-
-    // Quick Links (previous implementation remains the same)
-    function addQuickLink(link) {
-        // ... (previous quick links code remains unchanged)
-    }
-
-    // Form Submissions
-    taskForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = {
-            name: document.getElementById('taskName').value,
-            startTime: document.getElementById('startTime').value,
-            endTime: document.getElementById('endTime').value,
-            description: document.getElementById('taskDescription').value,
-            links: document.getElementById('taskLinks').value,
-            priority: document.getElementById('taskPriority').value,
-            labels: document.getElementById('taskLabels').value.split(',')
-                .map(label => label.trim())
-                .filter(label => label),
-            completed: false,
-            notifications: document.getElementById('taskNotifications').checked,
-            notified: false
-        };
-        
-        addTask(formData);
-        taskForm.reset();
-        hideModal('taskModal');
     });
 
     // Initialize features
@@ -338,58 +477,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('dark-mode');
     }
 
-    searchInput.addEventListener('input', (e) => {
-        const searchResults = searchTasks(e.target.value);
-        renderTasks(searchResults);
-    });
-
     if ('Notification' in window) {
         Notification.requestPermission();
         setInterval(checkNotifications, 60000);
     }
-
-    // Embed functionality
-    document.getElementById('addEmbed').addEventListener('click', () => {
-        showModal('embedModal');
-    });
-
-    function saveEmbeds() {
-        localStorage.setItem('embeds', JSON.stringify(embeds));
-    }
-
-    function renderEmbeds() {
-        const container = document.getElementById('embedList');
-        container.innerHTML = '';
-        embeds.forEach(embed => {
-            const div = document.createElement('div');
-            div.className = 'embed-item';
-            div.innerHTML = `
-                <iframe src="${embed.url}" title="${embed.name}" width="100%" height="300"></iframe>
-                <div class="embed-controls">
-                    <span>${embed.name}</span>
-                    <button class="delete-embed btn-small" data-id="${embed.id}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    document.getElementById('embedForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('embedName').value;
-        const url = document.getElementById('embedUrl').value;
-        embeds.push({ id: Date.now(), name, url });
-        saveEmbeds();
-        renderEmbeds();
-        hideModal('embedModal');
-        e.target.reset();
-    });
 
     // Initial render
     renderTasks();
     renderQuickLinks();
     renderCalendar();
     renderEmbeds();
-};
+});
