@@ -1,0 +1,111 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus TaskViewer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="closeSidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
+        <div class="quick-links">
+            <h4>Quick Links</h4>
+            <div id="quickLinksList"></div>
+            <button id="addQuickLink" class="btn-small">+ Add Quick Link</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>FullFocus TaskViewer</h1>
+            <button id="settingsBtn"><i class="fas fa-cog"></i></button>
+        </div>
+
+        <div class="datetime" id="datetime"></div>
+
+        <div class="row">
+            <div class="box categorized">
+                <h2>Categorized Tasks</h2>
+                <div id="categorizedTasks"></div>
+            </div>
+            <div class="box uncategorized">
+                <h2>Uncategorized Tasks</h2>
+                <div id="uncategorizedTasks"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="box calendar">
+                <h2>Calendar View</h2>
+                <div id="calendar"></div>
+            </div>
+        </div>
+
+        <button id="addTaskBtn" class="floating-btn">+ Add New Task</button>
+    </div>
+
+    <!-- Modals -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Task</h2>
+            <form id="taskForm">
+                <input type="text" id="taskName" placeholder="Task Name" required>
+                <input type="datetime-local" id="startTime">
+                <input type="datetime-local" id="endTime">
+                <textarea id="taskDescription" placeholder="Description"></textarea>
+                <input type="text" id="taskLinks" placeholder="Links (comma-separated)">
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>Settings</h2>
+            <button id="exportData">Export Data</button>
+            <div class="file-upload">
+                <label for="importData">Import Data:</label>
+                <input type="file" id="importData" accept=".txt">
+            </div>
+            <button class="cancel">Close</button>
+        </div>
+    </div>
+
+    <div id="calendarModal" class="modal">
+        <div class="modal-content">
+            <h2>Tasks for <span id="selectedDate"></span></h2>
+            <div id="dayTasks"></div>
+            <button class="cancel">Close</button>
+        </div>
+    </div>
+
+    <div id="quickLinkModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Quick Link</h2>
+            <form id="quickLinkForm">
+                <input type="text" id="linkName" placeholder="Link Name" required>
+                <input type="url" id="linkUrl" placeholder="URL" required>
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
