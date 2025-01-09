@@ -541,4 +541,4 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTasks,
         checkNotifications
     };
-}});
+}})
