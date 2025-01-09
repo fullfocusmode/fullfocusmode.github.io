@@ -1,29 +1,50 @@
 // Global modal functions
 function showModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'block';
-    }
+    if (modal) modal.style.display = 'block';
 }
 
 function hideModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) modal.style.display = 'none';
 }
 
+// Storage management
+const Storage = {
+    get: (key) => JSON.parse(localStorage.getItem(key) || 'null'),
+    set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
+    append: (key, value) => {
+        const current = Storage.get(key) || [];
+        current.push(value);
+        Storage.set(key, current);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Load sidebar
+    fetch('sidebar.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('sidebarContainer').innerHTML = data;
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            document.querySelectorAll('#sidebar a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+            initSidebar();
+        });
+
     // State management
-    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    let quickLinks = JSON.parse(localStorage.getItem('quickLinks')) || [];
-    let embeds = JSON.parse(localStorage.getItem('embeds')) || [];
-    let completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || {};
+    let tasks = Storage.get('tasks') || [];
+    let quickLinks = Storage.get('quickLinks') || [];
+    let embeds = Storage.get('embeds') || [];
+    let completedTasks = Storage.get('completedTasks') || {};
     let selectedTaskId = null;
 
     // DOM Elements
     let currentDate = new Date();
-    const sidebar = document.getElementById('sidebar');
     const datetime = document.getElementById('datetime');
     const categorizedTasks = document.getElementById('categorizedTasks');
     const uncategorizedTasks = document.getElementById('uncategorizedTasks');
@@ -34,80 +55,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cleanupCompletedTasks();
 
-    // Modal close on outside click
-    window.addEventListener('click', (e) => {
-        document.querySelectorAll('.modal').forEach(modal => {
-            if (e.target === modal) {
-                hideModal(modal.id);
-            }
+    // Initialize sidebar functionality
+    function initSidebar() {
+        document.getElementById('openSidebar')?.addEventListener('click', () => {
+            document.getElementById('sidebar')?.classList.add('active');
         });
-    });
 
-    // Modal buttons
-    document.querySelectorAll('.modal .cancel').forEach(button => {
-        button.addEventListener('click', () => {
-            const modal = button.closest('.modal');
-            hideModal(modal.id);
+        document.getElementById('closeSidebar')?.addEventListener('click', () => {
+            document.getElementById('sidebar')?.classList.remove('active');
         });
-    });
 
-    // Button event listeners
-    document.getElementById('addQuickLink').addEventListener('click', () => {
-        showModal('quickLinkModal');
-    });
+        document.getElementById('addQuickLink')?.addEventListener('click', () => {
+            showModal('quickLinkModal');
+        });
 
-    document.getElementById('addTaskBtn').addEventListener('click', () => {
-        selectedTaskId = null;
-        document.getElementById('taskForm').reset();
-        showModal('taskModal');
-    });
-
-    document.getElementById('addEmbed').addEventListener('click', () => {
-        showModal('embedModal');
-    });
-
-    document.getElementById('settingsBtn').addEventListener('click', () => {
-        showModal('settingsModal');
-    });
-
-    // Sidebar toggle
-    document.getElementById('openSidebar').addEventListener('click', () => {
-        sidebar.classList.add('active');
-    });
-
-    document.getElementById('closeSidebar').addEventListener('click', () => {
-        sidebar.classList.remove('active');
-    });
-
-    // Update datetime
-    function updateDateTime() {
-        const now = new Date();
-        datetime.textContent = now.toLocaleString();
-        setTimeout(updateDateTime, 1000);
+        document.getElementById('addEmbed')?.addEventListener('click', () => {
+            showModal('embedModal');
+        });
     }
-    updateDateTime();
-
-    function saveCompletedTasks() {
-        localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-    }
-    
-    // Task Management
-    function addTask(task) {
-        if (selectedTaskId) {
-            tasks = tasks.map(t => t.id === selectedTaskId ? {...task, id: selectedTaskId} : t);
-            selectedTaskId = null;
-        } else {
-            tasks.push({...task, id: Date.now()});
-        }
-        saveTasks();
-        renderTasks();
-        renderCalendar();
-    }
-
-    function saveTasks() {
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-    }
-
     function renderTasks(filteredTasks = tasks) {
         const now = new Date();
         const today = new Date().toDateString();
@@ -115,14 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
         categorizedTasks.innerHTML = '';
         uncategorizedTasks.innerHTML = '';
     
-        // Add toggle button for completed tasks
         const toggleButton = document.createElement('button');
         toggleButton.className = 'toggle-completed-btn';
         toggleButton.innerHTML = '<i class="fas fa-exchange-alt"></i> Toggle Completed Tasks';
         toggleButton.onclick = toggleCompletedTasksView;
         categorizedTasks.appendChild(toggleButton);
     
-        // Sort tasks by date and time
         const sortedTasks = filteredTasks.sort((a, b) => {
             if (!a.startTime) return 1;
             if (!b.startTime) return -1;
@@ -130,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     
         sortedTasks.forEach(task => {
-            if (task.completed) return; // Skip completed tasks in main view
+            if (task.completed) return;
             
             const taskElement = createTaskElement(task);
             
@@ -143,53 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 uncategorizedTasks.appendChild(taskElement);
             }
-        });
-    }
-
-    // Export data functionality
-    function initDataManagement() {
-        document.getElementById('exportData').addEventListener('click', () => {
-            const data = {
-                tasks: JSON.parse(localStorage.getItem('tasks') || '[]'),
-                quickLinks: JSON.parse(localStorage.getItem('quickLinks') || '[]'),
-                embeds: JSON.parse(localStorage.getItem('embeds') || '[]'),
-                completedTasks: JSON.parse(localStorage.getItem('completedTasks') || '{}')
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'fullfocus_backup.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-    
-        // Clear data functionality
-        document.getElementById('clearData').addEventListener('click', () => {
-            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
-                localStorage.clear();
-                location.reload();
-            }
-        });
-    }
-
-    // Dark mode toggle
-    function initDarkMode() {
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        
-        if (isDarkMode) {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.classList.add('active');
-        }
-        
-        darkModeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            darkModeToggle.classList.toggle('active');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
         });
     }
 
@@ -262,58 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         div.appendChild(actions);
         return div;
     }
-
-    function toggleCompletedTasksView() {
-        const today = new Date().toDateString();
-        const completedForToday = completedTasks[today] || [];
-        
-        if (categorizedTasks.classList.contains('showing-completed')) {
-            renderTasks(); // Switch back to normal view
-            categorizedTasks.classList.remove('showing-completed');
-        } else {
-            categorizedTasks.innerHTML = '';
-            const toggleButton = document.createElement('button');
-            toggleButton.className = 'toggle-completed-btn active';
-            toggleButton.innerHTML = '<i class="fas fa-exchange-alt"></i> Show Active Tasks';
-            toggleButton.onclick = toggleCompletedTasksView;
-            categorizedTasks.appendChild(toggleButton);
-    
-            completedForToday.forEach(task => {
-                const taskElement = createTaskElement(task);
-                taskElement.classList.add('completed');
-                categorizedTasks.appendChild(taskElement);
-            });
-            categorizedTasks.classList.add('showing-completed');
-        }
-    }
-
-    function toggleTaskComplete(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
-    
-        const today = new Date().toDateString();
-        if (!completedTasks[today]) {
-            completedTasks[today] = [];
-        }
-    
-        if (!task.completed) {
-            // Mark as completed and move to completed tasks
-            task.completed = true;
-            completedTasks[today].push({...task});
-            tasks = tasks.filter(t => t.id !== taskId);
-        } else {
-            // Move back to active tasks
-            task.completed = false;
-            completedTasks[today] = completedTasks[today].filter(t => t.id !== taskId);
-            tasks.push({...task});
-        }
-    
-        saveTasks();
-        saveCompletedTasks();
-        renderTasks();
-    }
-    
-    // Updated Calendar Functionality
+    // Calendar functionality
     function renderCalendar() {
         const calendarDiv = document.getElementById('calendar');
         const today = new Date();
@@ -379,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
         calendarHTML += '</div>';
         calendarDiv.innerHTML = calendarHTML;
     
-        // Add event listeners for calendar navigation and day clicks
         document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
         document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
         
@@ -391,12 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function changeMonth(delta) {
-        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1);
-        renderCalendar();
-    }
-    
-    // Updated showDayTasks function
     function showDayTasks(dateString) {
         const selectedDate = new Date(dateString);
         const dateStr = selectedDate.toDateString();
@@ -411,7 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const dayTasksDiv = document.getElementById('dayTasks');
         dayTasksDiv.innerHTML = '';
     
-        // Add toggle button in modal
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'toggle-completed-btn';
         toggleBtn.textContent = 'Toggle Completed Tasks';
@@ -435,7 +292,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             
-            // Replace existing tasks container if it exists
             const existingContainer = dayTasksDiv.querySelector('.tasks-container');
             if (existingContainer) {
                 dayTasksDiv.replaceChild(tasksContainer, existingContainer);
@@ -447,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDayTasks(activeTasks);
         showModal('calendarModal');
     }
-
     // Quick Links functionality
     function saveQuickLinks() {
         localStorage.setItem('quickLinks', JSON.stringify(quickLinks));
@@ -455,81 +310,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderQuickLinks() {
         const container = document.getElementById('quickLinksList');
-        container.innerHTML = '';
-        quickLinks.forEach(link => {
-            const div = document.createElement('div');
-            div.className = 'quick-link-item';
-            div.innerHTML = `
+        if (!container) return;
+        
+        container.innerHTML = quickLinks.map(link => `
+            <div class="quick-link-item">
                 <a href="${link.url}" target="_blank">${link.name}</a>
                 <button class="delete-link btn-small" data-id="${link.id}">
                     <i class="fas fa-trash"></i>
                 </button>
-            `;
-            container.appendChild(div);
-        });
-    }
+            </div>
+        `).join('');
 
-    function cleanupCompletedTasks() {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
-        Object.keys(completedTasks).forEach(dateStr => {
-            if (new Date(dateStr) < thirtyDaysAgo) {
-                delete completedTasks[dateStr];
-            }
-        });
-        
-        saveCompletedTasks();
-    }
-
-    // Task form submission
-    function initTaskForm() {
-        const taskForm = document.getElementById('taskForm');
-        taskForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const task = {
-                id: Date.now(),
-                name: document.getElementById('taskName').value,
-                startTime: document.getElementById('startTime').value || null,
-                endTime: document.getElementById('endTime').value || null,
-                description: document.getElementById('taskDescription').value,
-                links: document.getElementById('taskLinks').value,
-                priority: document.getElementById('taskPriority').value,
-                labels: document.getElementById('taskLabels').value.split(',')
-                    .map(label => label.trim())
-                    .filter(label => label),
-                notifications: document.getElementById('taskNotifications').checked
-            };
-    
-            const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-            tasks.push(task);
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            
-            renderTasks();
-            hideModal('taskModal');
-            taskForm.reset();
-        });
-    }
-
-    // Embed viewer functionality
-    function initEmbedViewer() {
-        document.querySelectorAll('.view-embed').forEach(button => {
+        container.querySelectorAll('.delete-link').forEach(button => {
             button.addEventListener('click', () => {
-                const embedId = button.getAttribute('data-id');
-                const embeds = JSON.parse(localStorage.getItem('embeds') || '[]');
-                const embed = embeds.find(e => e.id == embedId);
-                
-                if (embed) {
-                    document.getElementById('embedViewerTitle').textContent = embed.name;
-                    document.getElementById('embedViewerContent').innerHTML = 
-                        `<iframe src="${embed.url}" title="${embed.name}"></iframe>`;
-                    showModal('embedViewerModal');
-                }
+                const id = parseInt(button.dataset.id);
+                quickLinks = quickLinks.filter(link => link.id !== id);
+                saveQuickLinks();
+                renderQuickLinks();
             });
         });
     }
-    
+
     // Embed Management
     function saveEmbeds() {
         localStorage.setItem('embeds', JSON.stringify(embeds));
@@ -537,11 +338,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderEmbeds() {
         const container = document.getElementById('embedList');
-        container.innerHTML = '';
-        embeds.forEach(embed => {
-            const div = document.createElement('div');
-            div.className = 'embed-item';
-            div.innerHTML = `
+        if (!container) return;
+
+        container.innerHTML = embeds.map(embed => `
+            <div class="embed-item">
                 <div class="embed-controls">
                     <span>${embed.name}</span>
                     <button class="view-embed btn-small" data-id="${embed.id}">
@@ -551,36 +351,135 @@ document.addEventListener('DOMContentLoaded', () => {
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
-            `;
-            container.appendChild(div);
+            </div>
+        `).join('');
+
+        initEmbedHandlers();
+    }
+
+    function initEmbedHandlers() {
+        document.querySelectorAll('.view-embed').forEach(button => {
+            button.addEventListener('click', () => {
+                const embedId = button.dataset.id;
+                const embed = embeds.find(e => e.id == embedId);
+                if (embed) {
+                    document.getElementById('embedViewerTitle').textContent = embed.name;
+                    document.getElementById('embedViewerContent').innerHTML = 
+                        `<iframe src="${embed.url}" title="${embed.name}" width="100%" height="100%"></iframe>`;
+                    showModal('embedViewerModal');
+                }
+            });
         });
 
-    // Add event listeners for viewing embeds
-    document.querySelectorAll('.view-embed').forEach(button => {
-        button.addEventListener('click', () => {
-            const embedId = button.getAttribute('data-id');
-            const embed = embeds.find(e => e.id == embedId);
-            if (embed) {
-                document.getElementById('embedViewerTitle').textContent = embed.name;
-                document.getElementById('embedViewerContent').innerHTML = 
-                    `<iframe src="${embed.url}" title="${embed.name}" width="100%" height="100%"></iframe>`;
-                showModal('embedViewerModal');
-            }
+        document.querySelectorAll('.delete-embed').forEach(button => {
+            button.addEventListener('click', () => {
+                const embedId = button.dataset.id;
+                if (confirm('Are you sure you want to delete this embed?')) {
+                    embeds = embeds.filter(e => e.id != embedId);
+                    saveEmbeds();
+                    renderEmbeds();
+                }
+            });
         });
-    });
+    }
 
-    // Add event listeners for deleting embeds
-    document.querySelectorAll('.delete-embed').forEach(button => {
-        button.addEventListener('click', () => {
-            const embedId = button.getAttribute('data-id');
-            if (confirm('Are you sure you want to delete this embed?')) {
-                embeds = embeds.filter(e => e.id != embedId);
-                saveEmbeds();
-                renderEmbeds();
-            }
+    // Form Submissions
+    if (taskForm) {
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('taskName').value,
+                startTime: document.getElementById('startTime').value || null,
+                endTime: document.getElementById('endTime').value || null,
+                description: document.getElementById('taskDescription').value,
+                links: document.getElementById('taskLinks').value,
+                priority: document.getElementById('taskPriority').value,
+                labels: document.getElementById('taskLabels').value.split(',')
+                    .map(label => label.trim())
+                    .filter(label => label),
+                completed: false,
+                notifications: document.getElementById('taskNotifications').checked,
+                notified: false
+            };
+            
+            addTask(formData);
+            taskForm.reset();
+            hideModal('taskModal');
         });
-    });
-    
+    }
+
+    if (quickLinkForm) {
+        quickLinkForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('linkName').value;
+            const url = document.getElementById('linkUrl').value;
+            quickLinks.push({ id: Date.now(), name, url });
+            saveQuickLinks();
+            renderQuickLinks();
+            hideModal('quickLinkModal');
+            e.target.reset();
+        });
+    }
+
+    // Initialize features
+    renderQuickLinks();
+    renderEmbeds();
+    if (calendar) renderCalendar();
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchResults = searchTasks(e.target.value);
+            renderTasks(searchResults);
+        });
+    }
+
+    // Notification System
+    if ('Notification' in window) {
+        Notification.requestPermission();
+        setInterval(checkNotifications, 60000);
+    }
+});
+    // Task editing and completion
+    function editTask(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        selectedTaskId = taskId;
+        document.getElementById('taskName').value = task.name;
+        document.getElementById('startTime').value = task.startTime || '';
+        document.getElementById('endTime').value = task.endTime || '';
+        document.getElementById('taskDescription').value = task.description || '';
+        document.getElementById('taskLinks').value = task.links || '';
+        document.getElementById('taskPriority').value = task.priority || 'normal';
+        document.getElementById('taskLabels').value = (task.labels || []).join(', ');
+        document.getElementById('taskNotifications').checked = task.notifications || false;
+        showModal('taskModal');
+    }
+
+    function toggleTaskComplete(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        const today = new Date().toDateString();
+        if (!completedTasks[today]) {
+            completedTasks[today] = [];
+        }
+
+        if (!task.completed) {
+            task.completed = true;
+            completedTasks[today].push({...task});
+            tasks = tasks.filter(t => t.id !== taskId);
+        } else {
+            task.completed = false;
+            completedTasks[today] = completedTasks[today].filter(t => t.id !== taskId);
+            tasks.push({...task});
+        }
+
+        saveTasks();
+        saveCompletedTasks();
+        renderTasks();
+        renderCalendar();
+    }
+
     // Notification System
     function checkNotifications() {
         const now = new Date();
@@ -589,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const startTime = new Date(task.startTime);
                 const timeDiff = startTime - now;
                 
-                if (timeDiff > 0 && timeDiff <= 900000) {
+                if (timeDiff > 0 && timeDiff <= 900000) { // 15 minutes
                     showNotification(task);
                     task.notified = true;
                     saveTasks();
@@ -613,146 +512,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Add this to your task form submit handler
-    taskForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = {
-            name: document.getElementById('taskName').value,
-            startTime: document.getElementById('startTime').value || null,
-            endTime: document.getElementById('endTime').value || null,
-            description: document.getElementById('taskDescription').value,
-            links: document.getElementById('taskLinks').value,
-            priority: document.getElementById('taskPriority').value,
-            labels: document.getElementById('taskLabels').value.split(',')
-                .map(label => label.trim())
-                .filter(label => label),
-            completed: false,
-            notifications: document.getElementById('taskNotifications').checked,
-            notified: false
-        };
-        
-        addTask(formData);
-        taskForm.reset();
-        hideModal('taskModal');
-    });
-
-    quickLinkForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('linkName').value;
-        const url = document.getElementById('linkUrl').value;
-        quickLinks.push({ id: Date.now(), name, url });
-        saveQuickLinks();
-        renderQuickLinks();
-        hideModal('quickLinkModal');
-        e.target.reset();
-    });
-
-    document.getElementById('embedForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('embedName').value;
-        const url = document.getElementById('embedUrl').value;
-        embeds.push({ id: Date.now(), name, url });
-        saveEmbeds();
-        renderEmbeds();
-        hideModal('embedModal');
-        e.target.reset();
-    });
-
-    // Search functionality
-    searchInput.addEventListener('input', (e) => {
-        const searchResults = searchTasks(e.target.value);
-        renderTasks(searchResults);
-    });
-
-    function searchTasks(query) {
-        const searchTerm = query.toLowerCase();
-        return tasks.filter(task => 
-            task.name.toLowerCase().includes(searchTerm) ||
-            task.description?.toLowerCase().includes(searchTerm) ||
-            task.labels?.some(label => label.toLowerCase().includes(searchTerm)) ||
-            false
-        );
-    }
-
-    // Export/Import Functionality
-    document.getElementById('exportData').addEventListener('click', () => {
-        const data = {
-            tasks,
-            quickLinks,
-            embeds
-        };
-        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'fullfocus_backup.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    });
-
-    document.getElementById('importData').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    tasks = data.tasks || [];
-                    quickLinks = data.quickLinks || [];
-                    embeds = data.embeds || [];
-                    saveTasks();
-                    saveQuickLinks();
-                    saveEmbeds();
-                    renderTasks();
-                    renderQuickLinks();
-                    renderEmbeds();
-                    renderCalendar();
-                    alert('Data imported successfully!');
-                } catch (error) {
-                    alert('Error importing data: Invalid file format');
-                }
-            };
-            reader.readAsText(file);
-        }
-    });
-
-    // Task editing
-    function editTask(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
-
-        selectedTaskId = taskId;
-        document.getElementById('taskName').value = task.name;
-        document.getElementById('startTime').value = task.startTime || '';
-        document.getElementById('endTime').value = task.endTime || '';
-        document.getElementById('taskDescription').value = task.description || '';
-        document.getElementById('taskLinks').value = task.links || '';
-        document.getElementById('taskPriority').value = task.priority || 'normal';
-        document.getElementById('taskLabels').value = (task.labels || []).join(', ');
-        document.getElementById('taskNotifications').checked = task.notifications || false;
-
-        showModal('taskModal');
-    }
-
-    // Task completion toggle
-    function toggleTaskComplete(taskId) {
-        tasks = tasks.map(task => 
-            task.id === taskId 
-                ? { ...task, completed: !task.completed }
-                : task
-        );
-        saveTasks();
-        renderTasks();
-    }
-
-    // Dark mode toggle
-    document.getElementById('darkModeToggle').addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    });
-
     // Initialize features
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
@@ -770,4 +529,16 @@ document.addEventListener('DOMContentLoaded', () => {
     initEmbedViewer();
     renderTasks();
     renderCalendar();
-}})
+    renderQuickLinks();
+    renderEmbeds();
+
+    // Export utilities for other pages
+    window.appUtils = {
+        showModal,
+        hideModal,
+        Storage,
+        renderCalendar,
+        renderTasks,
+        checkNotifications
+    };
+});
