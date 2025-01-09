@@ -96,16 +96,26 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <h2>Settings</h2>
-            <div class="setting-item">
-                <label>Dark Mode</label>
-                <button id="darkModeToggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-            </div>
-            <div class="setting-item">
-                <button id="exportData">Export Data</button>
-            </div>
-            <div class="setting-item file-upload">
-                <label for="importData">Import Data:</label>
-                <input type="file" id="importData" accept=".txt">
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <h3>Appearance</h3>
+                    <div class="setting-control">
+                        <label>Dark Mode</label>
+                        <button id="darkModeToggle" class="toggle-btn">
+                            <span class="toggle-slider"></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <h3>Data Management</h3>
+                    <div class="setting-control">
+                        <button id="exportData" class="btn-primary">Export Data</button>
+                        <div class="file-upload">
+                            <label for="importData" class="btn-primary">Import Data</label>
+                            <input type="file" id="importData" accept=".json">
+                        </div>
+                    </div>
+                </div>
             </div>
             <button class="cancel">Close</button>
         </div>
@@ -136,17 +146,11 @@
     </div>
 
     <!-- Embed Modal -->
-    <div id="embedModal" class="modal">
-        <div class="modal-content">
-            <h2>Add New Embed</h2>
-            <form id="embedForm">
-                <input type="text" id="embedName" placeholder="Name" required>
-                <input type="url" id="embedUrl" placeholder="URL" required>
-                <div class="modal-buttons">
-                    <button type="submit">Save</button>
-                    <button type="button" class="cancel">Cancel</button>
-                </div>
-            </form>
+    <div id="embedViewerModal" class="modal">
+        <div class="modal-content embed-viewer">
+            <h2 id="embedViewerTitle"></h2>
+            <div id="embedViewerContent"></div>
+            <button class="cancel">Close</button>
         </div>
     </div>
 
