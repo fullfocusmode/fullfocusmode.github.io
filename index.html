@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FullFocus TaskViewer</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.png" type="image/png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Sidebar -->
@@ -63,7 +62,7 @@
         <button id="addTaskBtn" class="floating-btn">+ Add New Task</button>
     </div>
 
-    <!-- Task Modal -->
+    <!-- Add/Edit Task Modal -->
     <div id="taskModal" class="modal">
         <div class="modal-content">
             <h2>Add New Task</h2>
@@ -73,7 +72,7 @@
                 <input type="datetime-local" id="endTime">
                 <textarea id="taskDescription" placeholder="Description"></textarea>
                 <input type="text" id="taskLinks" placeholder="Links (comma-separated)">
-                <select id="taskPriority" required>
+                <select id="taskPriority">
                     <option value="normal">Normal Priority</option>
                     <option value="low">Low Priority</option>
                     <option value="medium">Medium Priority</option>
@@ -108,24 +107,16 @@
                 </div>
                 <div class="setting-item">
                     <h3>Data Management</h3>
-                    <div class="setting-control">
+                    <div class="setting-control data-buttons">
                         <button id="exportData" class="btn-primary">Export Data</button>
                         <div class="file-upload">
                             <label for="importData" class="btn-primary">Import Data</label>
                             <input type="file" id="importData" accept=".json">
                         </div>
+                        <button id="clearData" class="btn-danger">Clear Data</button>
                     </div>
                 </div>
             </div>
-            <button class="cancel">Close</button>
-        </div>
-    </div>
-
-    <!-- Calendar Modal -->
-    <div id="calendarModal" class="modal">
-        <div class="modal-content">
-            <h2>Tasks for <span id="selectedDate"></span></h2>
-            <div id="dayTasks"></div>
             <button class="cancel">Close</button>
         </div>
     </div>
@@ -146,6 +137,21 @@
     </div>
 
     <!-- Embed Modal -->
+    <div id="embedModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Web Embed</h2>
+            <form id="embedForm">
+                <input type="text" id="embedName" placeholder="Embed Name" required>
+                <input type="url" id="embedUrl" placeholder="URL" required>
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Embed Viewer Modal -->
     <div id="embedViewerModal" class="modal">
         <div class="modal-content embed-viewer">
             <h2 id="embedViewerTitle"></h2>
