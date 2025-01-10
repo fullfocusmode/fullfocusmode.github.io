@@ -255,6 +255,80 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Export/Import Functionality
+    function initDataManagement() {
+        document.getElementById('exportData').addEventListener('click', () => {
+            const data = {
+                tasks: Storage.get('tasks') || [],
+                quickLinks: Storage.get('quickLinks') || [],
+                embeds: Storage.get('embeds') || [],
+                completedTasks: Storage.get('completedTasks') || {},
+                habits: Storage.get('habits') || [],
+                flashcards: Storage.get('flashcardSets') || [],
+                skills: Storage.get('skills') || [],
+                journals: Storage.get('journals') || [],
+                focusSettings: Storage.get('focusSettings') || {
+                    focusDuration: 25,
+                    breakDuration: 5,
+                    longBreakDuration: 15,
+                    sessionsCount: 4
+                },
+                focusStats: Storage.get('focusStats') || {
+                    totalSessions: 0,
+                    totalFocusTime: 0,
+                    dailyStats: {}
+                },
+                moods: Storage.get('moods') || []
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fullfocus_backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    
+        document.getElementById('importData').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        
+                        // Import all data types
+                        Object.entries(data).forEach(([key, value]) => {
+                            Storage.set(key, value);
+                        });
+    
+                        // Refresh all components
+                        if (window.location.pathname.includes('index.html')) {
+                            renderTasks();
+                            renderQuickLinks();
+                            renderEmbeds();
+                            renderCalendar();
+                        } else if (window.location.pathname.includes('habits.html')) {
+                            new HabitManager().renderHabits();
+                        } else if (window.location.pathname.includes('flashcards.html')) {
+                            new FlashcardManager().renderSets();
+                        } else if (window.location.pathname.includes('skills.html')) {
+                            new SkillManager().renderSkills();
+                        }
+    
+                        alert('Data imported successfully!');
+                    } catch (error) {
+                        alert('Error importing data: Invalid file format');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+    }
+
     function showDayTasks(dateString) {
         const selectedDate = new Date(dateString);
         const dateStr = selectedDate.toDateString();
