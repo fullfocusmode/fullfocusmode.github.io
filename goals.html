@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus Goals</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>Goal Setting</h1>
+            <button id="addGoalBtn" class="btn-primary"><i class="fas fa-plus"></i> New Goal</button>
+        </div>
+
+        <div class="goals-grid">
+            <div class="box active-goals">
+                <h2>Active Goals</h2>
+                <div id="activeGoalsList"></div>
+            </div>
+            
+            <div class="box completed-goals">
+                <h2>Completed Goals</h2>
+                <div id="completedGoalsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="goalModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Goal</h2>
+            <form id="goalForm">
+                <input type="text" id="goalTitle" placeholder="Goal Title" required>
+                <textarea id="goalDescription" placeholder="Goal Description"></textarea>
+                <input type="date" id="goalDeadline" required>
+                <select id="goalCategory" required>
+                    <option value="personal">Personal</option>
+                    <option value="professional">Professional</option>
+                    <option value="health">Health</option>
+                    <option value="financial">Financial</option>
+                </select>
+                <div class="milestone-section">
+                    <h3>Milestones</h3>
+                    <div id="milestonesList"></div>
+                    <button type="button" id="addMilestone" class="btn-small">Add Milestone</button>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="goals.js"></script>
+</body>
+</html>
