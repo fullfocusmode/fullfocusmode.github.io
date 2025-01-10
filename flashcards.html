@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus Skills</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>Skill Tracker</h1>
+            <button id="addSkillBtn" class="btn-primary"><i class="fas fa-plus"></i> Add Skill</button>
+        </div>
+
+        <div class="skills-grid">
+            <div class="box skills-list">
+                <h2>My Skills</h2>
+                <div id="skillsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="skillModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Skill</h2>
+            <form id="skillForm">
+                <input type="text" id="skillName" placeholder="Skill Name" required>
+                <select id="skillCategory">
+                    <option value="technical">Technical</option>
+                    <option value="soft">Soft Skills</option>
+                    <option value="language">Language</option>
+                    <option value="other">Other</option>
+                </select>
+                <input type="range" id="skillLevel" min="1" max="5" value="1">
+                <span id="skillLevelDisplay">1/5</span>
+                <textarea id="skillNotes" placeholder="Notes and milestones"></textarea>
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="skills.js"></script>
+</body>
+</html>
