@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus Chat</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>Chat Room</h1>
+        </div>
+
+        <div class="chat-container">
+            <script src="https://minnit.chat/js/embed.js" defer></script>
+            <minnit-chat 
+                data-chatname="https://organizations.minnit.chat/275310646090590/Main?embed&nickname=" 
+                data-style="width:90%;height:500px;max-height:90vh;">
+            </minnit-chat>
+            <p class="powered-by-minnit"></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
