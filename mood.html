@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus Mood Tracker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>Mood Tracker</h1>
+            <button id="addMoodBtn" class="btn-primary"><i class="fas fa-plus"></i> Log Mood</button>
+        </div>
+
+        <div class="mood-grid">
+            <div class="box mood-calendar">
+                <h2>Monthly Overview</h2>
+                <div id="moodCalendar"></div>
+            </div>
+            
+            <div class="box mood-stats">
+                <h2>Mood Statistics</h2>
+                <canvas id="moodChart"></canvas>
+            </div>
+            
+            <div class="box mood-journal">
+                <h2>Mood Journal</h2>
+                <div id="moodEntries"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="moodModal" class="modal">
+        <div class="modal-content">
+            <h2>Log Your Mood</h2>
+            <form id="moodForm">
+                <div class="mood-selector">
+                    <button type="button" data-mood="5" class="mood-btn"><i class="fas fa-laugh-beam"></i></button>
+                    <button type="button" data-mood="4" class="mood-btn"><i class="fas fa-smile"></i></button>
+                    <button type="button" data-mood="3" class="mood-btn"><i class="fas fa-meh"></i></button>
+                    <button type="button" data-mood="2" class="mood-btn"><i class="fas fa-frown"></i></button>
+                    <button type="button" data-mood="1" class="mood-btn"><i class="fas fa-sad-tear"></i></button>
+                </div>
+                <input type="hidden" id="moodValue" required>
+                <textarea id="moodNote" placeholder="How are you feeling? (Optional)"></textarea>
+                <div class="mood-factors">
+                    <h3>Contributing Factors</h3>
+                    <div class="factors-grid">
+                        <label><input type="checkbox" value="sleep"> Sleep</label>
+                        <label><input type="checkbox" value="exercise"> Exercise</label>
+                        <label><input type="checkbox" value="nutrition"> Nutrition</label>
+                        <label><input type="checkbox" value="work"> Work</label>
+                        <label><input type="checkbox" value="social"> Social</label>
+                        <label><input type="checkbox" value="health"> Health</label>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="mood.js"></script>
+</body>
+</html>
