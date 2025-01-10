@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus Analytics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>Analytics</h1>
+            <div class="date-range">
+                <select id="timeRange">
+                    <option value="week">Last Week</option>
+                    <option value="month">Last Month</option>
+                    <option value="quarter">Last Quarter</option>
+                    <option value="year">Last Year</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="analytics-grid">
+            <div class="box overview">
+                <h2>Performance Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-value" id="completionRate">0%</span>
+                        <span class="stat-label">Task Completion Rate</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="focusTime">0h</span>
+                        <span class="stat-label">Total Focus Time</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="productivity">0%</span>
+                        <span class="stat-label">Productivity Score</span>
+                    </div>
+                </div>
+                <canvas id="performanceChart"></canvas>
+            </div>
+
+            <div class="box task-analysis">
+                <h2>Task Analysis</h2>
+                <div class="chart-container">
+                    <canvas id="taskDistributionChart"></canvas>
+                </div>
+                <div class="task-metrics">
+                    <div class="metric">
+                        <h3>Task Categories</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="metric">
+                        <h3>Priority Distribution</h3>
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box trends">
+                <h2>Trends</h2>
+                <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="analytics.js"></script>
+</body>
+</html>
