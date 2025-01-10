@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus Statistics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button id="openSidebar"><i class="fas fa-bars"></i></button>
+            <h1>Statistics</h1>
+            <div class="export-options">
+                <button id="exportStats" class="btn-primary">
+                    <i class="fas fa-download"></i> Export Report
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-container">
+            <div class="box summary">
+                <h2>Summary Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalTasks">0</span>
+                        <span class="stat-label">Total Tasks</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="avgCompletion">0</span>
+                        <span class="stat-label">Avg. Completion Time</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="streakDays">0</span>
+                        <span class="stat-label">Day Streak</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box time-distribution">
+                <h2>Time Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="timeDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="box productivity-patterns">
+                <h2>Productivity Patterns</h2>
+                <div class="patterns-grid">
+                    <div class="pattern-item">
+                        <h3>Peak Hours</h3>
+                        <canvas id="peakHoursChart"></canvas>
+                    </div>
+                    <div class="pattern-item">
+                        <h3>Weekly Performance</h3>
+                        <canvas id="weeklyPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box detailed-metrics">
+                <h2>Detailed Metrics</h2>
+                <div class="metrics-table">
+                    <table id="metricsTable">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>This Week</th>
+                                <th>Last Week</th>
+                                <th>Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="stats.js"></script>
+</body>
+</html>
