@@ -128,6 +128,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function initModalHandlers() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) hideModal(modal.id);
+            });
+        });
+    }
+
+    function initSearch() {
+        let timeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                const searchResults = searchTasks(e.target.value);
+                renderTasks(searchResults);
+            }, 300);
+        });
+    }
+
+    function changeMonth(delta) {
+        currentDate.setMonth(currentDate.getMonth() + delta);
+        renderCalendar();
+    }
+
     function createTaskElement(task) {
         const div = document.createElement('div');
         div.className = `task-item ${task.completed ? 'completed' : ''} priority-${task.priority || 'normal'}`;
@@ -276,39 +300,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initTaskForm() {
         const taskForm = document.getElementById('taskForm');
-        if (taskForm) {
-            taskForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const formData = {
-                    id: selectedTaskId || Date.now(),
-                    name: document.getElementById('taskName').value,
-                    startTime: document.getElementById('startTime').value || null,
-                    endTime: document.getElementById('endTime').value || null,
-                    description: document.getElementById('taskDescription').value,
-                    links: document.getElementById('taskLinks').value,
-                    priority: document.getElementById('taskPriority').value,
-                    labels: document.getElementById('taskLabels').value.split(',')
-                        .map(label => label.trim())
-                        .filter(label => label),
-                    completed: false,
-                    notifications: document.getElementById('taskNotifications').checked,
-                    notified: false
-                };
-                
-                if (selectedTaskId) {
-                    tasks = tasks.map(t => t.id === selectedTaskId ? formData : t);
-                } else {
-                    tasks.push(formData);
-                }
-                
-                saveTasks();
-                renderTasks();
-                renderCalendar();
-                taskForm.reset();
-                hideModal('taskModal');
-                selectedTaskId = null;
-            });
-        }
+        if (!taskForm) return;
+    
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = {
+                id: Date.now(), // Missing task ID generation
+                name: document.getElementById('taskName').value,
+                startTime: document.getElementById('startTime').value || null,
+                endTime: document.getElementById('endTime').value || null,
+                description: document.getElementById('taskDescription').value,
+                links: document.getElementById('taskLinks').value,
+                priority: document.getElementById('taskPriority').value,
+                labels: document.getElementById('taskLabels').value.split(',')
+                    .map(label => label.trim())
+                    .filter(label => label),
+                completed: false,
+                notifications: document.getElementById('taskNotifications').checked,
+                notified: false
+            };
+            
+            if (selectedTaskId) {
+                tasks = tasks.map(t => t.id === selectedTaskId ? {...t, ...formData} : t);
+            } else {
+                tasks.push(formData);
+            }
+            
+            saveTasks();
+            renderTasks();
+            renderCalendar();
+            taskForm.reset();
+            hideModal('taskModal');
+        });
     }
 
     // Export/Import Functionality
