@@ -1,4 +1,12 @@
-// Global modal functions
+function initEmbedViewer() {
+    document.querySelectorAll('.modal .cancel').forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) hideModal(modal.id);
+        });
+    });
+}
+
 function showModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) modal.style.display = 'block';
@@ -266,6 +274,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function initTaskForm() {
+        const taskForm = document.getElementById('taskForm');
+        if (taskForm) {
+            taskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = {
+                    id: selectedTaskId || Date.now(),
+                    name: document.getElementById('taskName').value,
+                    startTime: document.getElementById('startTime').value || null,
+                    endTime: document.getElementById('endTime').value || null,
+                    description: document.getElementById('taskDescription').value,
+                    links: document.getElementById('taskLinks').value,
+                    priority: document.getElementById('taskPriority').value,
+                    labels: document.getElementById('taskLabels').value.split(',')
+                        .map(label => label.trim())
+                        .filter(label => label),
+                    completed: false,
+                    notifications: document.getElementById('taskNotifications').checked,
+                    notified: false
+                };
+                
+                if (selectedTaskId) {
+                    tasks = tasks.map(t => t.id === selectedTaskId ? formData : t);
+                } else {
+                    tasks.push(formData);
+                }
+                
+                saveTasks();
+                renderTasks();
+                renderCalendar();
+                taskForm.reset();
+                hideModal('taskModal');
+                selectedTaskId = null;
+            });
+        }
+    }
+
     // Export/Import Functionality
     function initDataManagement() {
         document.getElementById('exportData').addEventListener('click', () => {
@@ -442,6 +487,33 @@ document.addEventListener('DOMContentLoaded', () => {
         initEmbedHandlers();
     }
 
+    function searchTasks(query) {
+        if (!query) return tasks;
+        
+        query = query.toLowerCase();
+        return tasks.filter(task => 
+            task.name.toLowerCase().includes(query) ||
+            task.description?.toLowerCase().includes(query) ||
+            task.labels?.some(label => label.toLowerCase().includes(query))
+        );
+    }
+
+    function initDarkMode() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        if (darkModeToggle) {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            darkModeToggle.classList.toggle('active', isDarkMode);
+            
+            darkModeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const isNowDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isNowDark);
+                darkModeToggle.classList.toggle('active', isNowDark);
+            });
+        }
+    }
+
     function initEmbedHandlers() {
         document.querySelectorAll('.view-embed').forEach(button => {
             button.addEventListener('click', () => {
@@ -538,6 +610,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('taskLabels').value = (task.labels || []).join(', ');
         document.getElementById('taskNotifications').checked = task.notifications || false;
         showModal('taskModal');
+    }
+
+    function saveTasks() {
+        Storage.set('tasks', tasks);
+    }
+    
+    function saveCompletedTasks() {
+        Storage.set('completedTasks', completedTasks);
+    }
+    
+    function cleanupCompletedTasks() {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        Object.keys(completedTasks).forEach(dateStr => {
+            if (new Date(dateStr) < thirtyDaysAgo) {
+                delete completedTasks[dateStr];
+            }
+        });
+        saveCompletedTasks();
     }
 
     function toggleTaskComplete(taskId) {
