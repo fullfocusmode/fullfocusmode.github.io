@@ -230,6 +230,25 @@ document.addEventListener('DOMContentLoaded', () => {
         div.appendChild(actions);
         return div;
     }
+
+    // Modify the task form HTML
+    document.getElementById('startTime').removeAttribute('required');
+    document.getElementById('endTime').removeAttribute('required');
+    
+    // Update the addTask function
+    function addTask(formData) {
+        const taskId = Date.now();
+        const task = {
+            id: taskId,
+            ...formData
+        };
+        tasks.push(task);
+        Storage.set('tasks', tasks);
+        renderTasks();
+        renderCalendar();
+    }
+
+    
     // Calendar functionality
     function renderCalendar() {
         const calendarDiv = document.getElementById('calendar');
