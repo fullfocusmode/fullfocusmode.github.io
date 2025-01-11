@@ -72,6 +72,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('addEmbed')?.addEventListener('click', () => {
             showModal('embedModal');
         });
+
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            showModal('settingsModal');
+        });
+
+        document.getElementById('addTaskBtn').addEventListener('click', () => {
+            selectedTaskId = null;
+            document.getElementById('taskForm').reset();
+            showModal('taskModal');
+        });
+
     }
     function renderTasks(filteredTasks = tasks) {
         const now = new Date();
