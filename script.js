@@ -92,6 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     }
+
+    // Initialize data from localStorage
+    function initializeData() {
+        tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        quickLinks = JSON.parse(localStorage.getItem('quickLinks')) || [];
+        embeds = JSON.parse(localStorage.getItem('embeds')) || [];
+        completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || {};
+    }
+    
     function renderTasks(filteredTasks = tasks) {
         const now = new Date();
         const today = new Date().toDateString();
@@ -296,6 +305,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 showDayTasks(dateStr);
             });
         });
+    }
+
+    function cleanupCompletedTasks() {
+        if (!completedTasks) return;
+        
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        Object.keys(completedTasks).forEach(dateStr => {
+            if (new Date(dateStr) < thirtyDaysAgo) {
+                delete completedTasks[dateStr];
+            }
+        });
+        localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
     }
 
     function initTaskForm() {
@@ -521,20 +544,21 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
+    // Dark mode functionality
     function initDarkMode() {
         const darkModeToggle = document.getElementById('darkModeToggle');
-        if (darkModeToggle) {
-            const isDarkMode = localStorage.getItem('darkMode') === 'true';
-            document.body.classList.toggle('dark-mode', isDarkMode);
-            darkModeToggle.classList.toggle('active', isDarkMode);
-            
-            darkModeToggle.addEventListener('click', () => {
-                document.body.classList.toggle('dark-mode');
-                const isNowDark = document.body.classList.contains('dark-mode');
-                localStorage.setItem('darkMode', isNowDark);
-                darkModeToggle.classList.toggle('active', isNowDark);
-            });
-        }
+        if (!darkModeToggle) return;
+    
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        document.body.classList.toggle('dark-mode', isDarkMode);
+        darkModeToggle.classList.toggle('active', isDarkMode);
+        
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isNowDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isNowDark);
+            darkModeToggle.classList.toggle('active', isNowDark);
+        });
     }
 
     function initEmbedHandlers() {
@@ -722,15 +746,22 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(checkNotifications, 60000);
     }
 
-    // Initial render
+    initializeData();
     initDarkMode();
+    initSidebar();
     initDataManagement();
     initTaskForm();
     initEmbedViewer();
+    initModalHandlers();
+    initSearch();
+    
     renderTasks();
     renderCalendar();
     renderQuickLinks();
     renderEmbeds();
+    
+    // Clean up completed tasks on load
+    cleanupCompletedTasks();
 
     // Export utilities for other pages
     window.appUtils = {
