@@ -396,6 +396,7 @@ body.dark-mode .quick-link-item {
 /* Calendar Styling */
 .calendar-grid {
     display: grid;
+    grid-template-rows: repeat(5, 1fr);
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
     background: #fff;
@@ -429,12 +430,13 @@ body.dark-mode .quick-link-item {
 
 .calendar-day {
     position: relative;
-    min-height: 80px;
     padding: 5px;
     background: #fff;
     border: 1px solid #eee;
     cursor: pointer;
     transition: all 0.3s ease;
+    aspect-ratio: 1;
+    min-height: 100px;
 }
 
 .calendar-day:hover {
