@@ -102,37 +102,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderTasks(filteredTasks = tasks) {
-        const now = new Date();
-        const today = new Date().toDateString();
+        const categorizedContainer = document.getElementById('categorizedTasks');
+        const uncategorizedContainer = document.getElementById('uncategorizedTasks');
         
-        categorizedTasks.innerHTML = '';
-        uncategorizedTasks.innerHTML = '';
-    
-        const toggleButton = document.createElement('button');
-        toggleButton.className = 'toggle-completed-btn';
-        toggleButton.innerHTML = '<i class="fas fa-exchange-alt"></i> Toggle Completed Tasks';
-        toggleButton.onclick = toggleCompletedTasksView;
-        categorizedTasks.appendChild(toggleButton);
-    
-        const sortedTasks = filteredTasks.sort((a, b) => {
-            if (!a.startTime) return 1;
-            if (!b.startTime) return -1;
-            return new Date(a.startTime) - new Date(b.startTime);
-        });
-    
-        sortedTasks.forEach(task => {
-            if (task.completed) return;
-            
+        if (!categorizedContainer || !uncategorizedContainer) return;
+        
+        categorizedContainer.innerHTML = '';
+        uncategorizedContainer.innerHTML = '';
+        
+        filteredTasks.forEach(task => {
             const taskElement = createTaskElement(task);
-            
             if (task.startTime) {
-                const start = new Date(task.startTime);
-                if (now >= start && (!task.endTime || now <= new Date(task.endTime))) {
-                    taskElement.classList.add('focused');
-                }
-                categorizedTasks.appendChild(taskElement);
+                categorizedContainer.appendChild(taskElement);
             } else {
-                uncategorizedTasks.appendChild(taskElement);
+                uncategorizedContainer.appendChild(taskElement);
             }
         });
     }
@@ -384,69 +367,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 quickLinks: Storage.get('quickLinks') || [],
                 embeds: Storage.get('embeds') || [],
                 completedTasks: Storage.get('completedTasks') || {},
-                habits: Storage.get('habits') || [],
-                flashcards: Storage.get('flashcardSets') || [],
-                skills: Storage.get('skills') || [],
-                journals: Storage.get('journals') || [],
-                focusSettings: Storage.get('focusSettings') || {
-                    focusDuration: 25,
-                    breakDuration: 5,
-                    longBreakDuration: 15,
-                    sessionsCount: 4
-                },
-                focusStats: Storage.get('focusStats') || {
-                    totalSessions: 0,
-                    totalFocusTime: 0,
-                    dailyStats: {}
-                },
-                moods: Storage.get('moods') || []
+                settings: Storage.get('settings') || {}
             };
             
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'fullfocus_backup.json';
-            document.body.appendChild(a);
+            a.download = `fullfocus_backup_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
-            document.body.removeChild(a);
             URL.revokeObjectURL(url);
         });
     
-        document.getElementById('importData').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const data = JSON.parse(event.target.result);
-                        
-                        // Import all data types
-                        Object.entries(data).forEach(([key, value]) => {
-                            Storage.set(key, value);
-                        });
-    
-                        // Refresh all components
-                        if (window.location.pathname.includes('index.html')) {
-                            renderTasks();
-                            renderQuickLinks();
-                            renderEmbeds();
-                            renderCalendar();
-                        } else if (window.location.pathname.includes('habits.html')) {
-                            new HabitManager().renderHabits();
-                        } else if (window.location.pathname.includes('flashcards.html')) {
-                            new FlashcardManager().renderSets();
-                        } else if (window.location.pathname.includes('skills.html')) {
-                            new SkillManager().renderSkills();
-                        }
-    
-                        alert('Data imported successfully!');
-                    } catch (error) {
-                        alert('Error importing data: Invalid file format');
-                    }
-                };
-                reader.readAsText(file);
+        document.getElementById('clearData').addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                localStorage.clear();
+                window.location.reload();
             }
+        });
+    
+        document.getElementById('settingsModal').querySelector('.cancel').addEventListener('click', () => {
+            hideModal('settingsModal');
         });
     }
 
@@ -563,7 +504,6 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Dark mode functionality
     function initDarkMode() {
         const darkModeToggle = document.getElementById('darkModeToggle');
         if (!darkModeToggle) return;
