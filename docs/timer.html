@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer - FullFocus TaskViewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <!-- Same sidebar content as index.html -->
+    </div>
+
+    <main>
+        <header>
+            <button onclick="toggleSidebar()" class="menu-btn">☰</button>
+            <h1>Timer</h1>
+        </header>
+
+        <div class="timer-container">
+            <div class="timer-display">
+                <span id="minutes">25</span>:<span id="seconds">00</span>
+            </div>
+            <div class="timer-controls">
+                <button onclick="startTimer()" id="startBtn">Start</button>
+                <button onclick="pauseTimer()" id="pauseBtn">Pause</button>
+                <button onclick="resetTimer()" id="resetBtn">Reset</button>
+            </div>
+            <div class="timer-settings">
+                <input type="number" id="customMinutes" min="1" max="60" value="25">
+                <button onclick="setCustomTime()">Set Time</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
