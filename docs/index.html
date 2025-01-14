@@ -1,1 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullFocus TaskViewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+        <nav>
+            <a href="index.html" class="active">Tasks</a>
+            <a href="notes.html">Notes</a>
+            <a href="timer.html">Timer</a>
+            <a href="chatroom.html">Chatroom</a>
+        </nav>
+        <div class="quick-links">
+            <h3>Quick Links</h3>
+            <div id="quickLinksContainer"></div>
+            <button onclick="addQuickLink()" class="add-link-btn">Add Link</button>
+        </div>
+        <div class="web-viewer">
+            <h3>Web Viewer</h3>
+            <div id="webViewerContainer"></div>
+            <button onclick="addWebViewer()" class="add-viewer-btn">Add Embed</button>
+        </div>
+    </div>
 
+    <main>
+        <header>
+            <button onclick="toggleSidebar()" class="menu-btn">☰</button>
+            <h1>FullFocus TaskViewer</h1>
+            <button onclick="openSettings()" class="settings-btn">⚙️</button>
+        </header>
+
+        <div class="content">
+            <div class="task-columns">
+                <div class="task-column">
+                    <h2>Categorized Tasks</h2>
+                    <div id="categorizedTasks"></div>
+                </div>
+                <div class="task-column">
+                    <h2>Uncategorized Tasks</h2>
+                    <div id="uncategorizedTasks"></div>
+                </div>
+            </div>
+            <div class="calendar-section">
+                <div id="calendar"></div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button onclick="openSearchModal()" class="search-btn">Search Tasks</button>
+            <button onclick="openAddTaskModal()" class="add-btn">+ Add New Task</button>
+        </div>
+    </main>
+
+    <!-- Add Task Modal -->
+    <div id="addTaskModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Task</h2>
+            <form id="taskForm">
+                <input type="text" id="taskName" placeholder="Task Name" required>
+                <div class="date-time-group">
+                    <input type="date" id="startDate">
+                    <input type="time" id="startTime" disabled>
+                    <input type="checkbox" id="startTimeToggle" onchange="toggleTimeInput('start')">
+                </div>
+                <div class="date-time-group">
+                    <input type="date" id="endDate">
+                    <input type="time" id="endTime" disabled>
+                    <input type="checkbox" id="endTimeToggle" onchange="toggleTimeInput('end')">
+                </div>
+                <textarea id="taskDescription" placeholder="Description"></textarea>
+                <input type="text" id="taskLinks" placeholder="Links (comma separated)">
+                <select id="taskPriority">
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                </select>
+                <input type="text" id="taskLabels" placeholder="Labels (comma separated)">
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="closeModal('addTaskModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>Settings</h2>
+            <div class="settings-options">
+                <div class="setting-item">
+                    <label>Dark Mode</label>
+                    <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+                </div>
+                <div class="setting-item">
+                    <h3>Data Management</h3>
+                    <button onclick="exportData()">Export Data</button>
+                    <button onclick="importData()">Import Data</button>
+                    <button onclick="clearData()" class="danger">Clear Data</button>
+                </div>
+            </div>
+            <button onclick="closeModal('settingsModal')">Close</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</main>
+</body>
+</html>
