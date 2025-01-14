@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes - FullFocus TaskViewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <!-- Same sidebar content as index.html -->
+    </div>
+
+    <main>
+        <header>
+            <button onclick="toggleSidebar()" class="menu-btn">☰</button>
+            <h1>Notes</h1>
+        </header>
+
+        <div class="notes-container">
+            <div id="notesGrid" class="notes-grid"></div>
+            <button onclick="openAddNoteModal()" class="add-btn">+ Add New Note</button>
+        </div>
+    </main>
+
+    <!-- Add Note Modal -->
+    <div id="addNoteModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Note</h2>
+            <form id="noteForm">
+                <input type="text" id="noteTitle" placeholder="Note Title" required>
+                <textarea id="noteDescription" placeholder="Description" required></textarea>
+                <div class="modal-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="closeModal('addNoteModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
