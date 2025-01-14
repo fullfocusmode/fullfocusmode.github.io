@@ -9,7 +9,23 @@
 </head>
 <body>
     <div class="sidebar" id="sidebar">
-        <!-- Same sidebar content as index.html -->
+        <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+        <nav>
+            <a href="index.html" class="active">Tasks</a>
+            <a href="notes.html">Notes</a>
+            <a href="timer.html">Timer</a>
+            <a href="chatroom.html">Chatroom</a>
+        </nav>
+        <div class="quick-links">
+            <h3>Quick Links</h3>
+            <div id="quickLinksContainer"></div>
+            <button onclick="addQuickLink()" class="add-link-btn">Add Link</button>
+        </div>
+        <div class="web-viewer">
+            <h3>Web Viewer</h3>
+            <div id="webViewerContainer"></div>
+            <button onclick="addWebViewer()" class="add-viewer-btn">Add Embed</button>
+        </div>
     </div>
 
     <main>
