@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatroom - FullFocus TaskViewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <!-- Same sidebar content as index.html -->
+    </div>
+
+    <main>
+        <header>
+            <button onclick="toggleSidebar()" class="menu-btn">☰</button>
+            <h1>Chatroom</h1>
+        </header>
+
+        <div class="chat-container">
+            <script src="https://minnit.chat/js/embed.js" defer></script>
+            <minnit-chat 
+                data-chatname="https://organizations.minnit.chat/275310646090590/Main?embed&nickname=" 
+                data-style="width:90%;height:500px;max-height:90vh;">
+            </minnit-chat>
+            <p class="powered-by-minnit"></p>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
