@@ -5,45 +5,347 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatroom - FullFocus TaskViewer</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Chatroom-specific styles */
+        .chat-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            height: calc(100vh - 180px);
+            margin: 20px 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .online-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .chat-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-controls button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .chat-controls button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-sidebar {
+            width: 250px;
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .chat-sidebar.open {
+            display: block;
+        }
+
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-wrapper {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        .chat-options {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            padding: 10px;
+            display: none;
+            z-index: 100;
+        }
+
+        .chat-options.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .chat-option {
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .chat-option:hover {
+            background: var(--bg-secondary);
+        }
+
+        .chat-embed {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .powered-by-minnit {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            background: var(--bg-primary);
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .chat-sidebar {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .chat-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .chat-controls {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <p>Connecting to Chat...</p>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
-        <button class="close-btn" onclick="toggleSidebar()">&times;</button>
-        <nav>
-            <a href="index.html" class="active">Tasks</a>
-            <a href="notes.html">Notes</a>
-            <a href="timer.html">Timer</a>
-            <a href="chatroom.html">Chatroom</a>
-        </nav>
-        <div class="quick-links">
-            <h3>Quick Links</h3>
-            <div id="quickLinksContainer"></div>
-            <button onclick="addQuickLink()" class="add-link-btn">Add Link</button>
+        <!-- Same sidebar content as other pages -->
+        <div class="sidebar-header">
+            <img src="https://via.placeholder.com/50" alt="Logo" class="logo">
+            <h2>FullFocus</h2>
+            <button class="close-btn" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <div class="web-viewer">
-            <h3>Web Viewer</h3>
-            <div id="webViewerContainer"></div>
-            <button onclick="addWebViewer()" class="add-viewer-btn">Add Embed</button>
+
+        <nav class="sidebar-nav">
+            <a href="index.html">
+                <i class="fas fa-tasks"></i>
+                <span>Tasks</span>
+            </a>
+            <a href="notes.html">
+                <i class="fas fa-sticky-note"></i>
+                <span>Notes</span>
+            </a>
+            <a href="timer.html">
+                <i class="fas fa-clock"></i>
+                <span>Timer</span>
+            </a>
+            <a href="chatroom.html" class="active">
+                <i class="fas fa-comments"></i>
+                <span>Chatroom</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-section">
+            <h3><i class="fas fa-link"></i> Quick Links</h3>
+            <div id="quickLinksContainer" class="quick-links-container"></div>
+            <button onclick="addQuickLink()" class="add-btn">
+                <i class="fas fa-plus"></i> Add Link
+            </button>
+        </div>
+
+        <div class="sidebar-section">
+            <h3><i class="fas fa-globe"></i> Web Viewer</h3>
+            <div id="webViewerContainer" class="web-viewer-container"></div>
+            <button onclick="addWebViewer()" class="add-btn">
+                <i class="fas fa-plus"></i> Add Embed
+            </button>
         </div>
     </div>
 
+    <!-- Main Content -->
     <main>
-        <header>
-            <button onclick="toggleSidebar()" class="menu-btn">☰</button>
-            <h1>Chatroom</h1>
+        <header class="main-header">
+            <div class="header-left">
+                <button onclick="toggleSidebar()" class="menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1><i class="fas fa-comments"></i> Chatroom</h1>
+            </div>
         </header>
 
         <div class="chat-container">
-            <script src="https://minnit.chat/js/embed.js" defer></script>
-            <minnit-chat 
-                data-chatname="https://organizations.minnit.chat/275310646090590/Main?embed&nickname=" 
-                data-style="width:90%;height:500px;max-height:90vh;">
-            </minnit-chat>
-            <p class="powered-by-minnit"></p>
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <h2>Community Chat</h2>
+                    <div class="online-status">
+                        <span class="status-dot"></span>
+                        <span id="onlineCount">0 online</span>
+                    </div>
+                </div>
+                <div class="chat-controls">
+                    <button onclick="toggleChatSidebar()" title="Toggle Users List">
+                        <i class="fas fa-users"></i>
+                    </button>
+                    <button onclick="toggleChatOptions()" title="Chat Options">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="chat-wrapper">
+                <div class="chat-sidebar" id="chatSidebar">
+                    <h3>Online Users</h3>
+                    <div id="onlineUsers" class="online-users-list">
+                        <!-- Online users will be populated here -->
+                    </div>
+                </div>
+
+                <div class="chat-main">
+                    <div class="chat-options" id="chatOptions">
+                        <div class="chat-option" onclick="toggleDarkMode()">
+                            <i class="fas fa-moon"></i>
+                            <span>Toggle Dark Mode</span>
+                        </div>
+                        <div class="chat-option" onclick="clearChat()">
+                            <i class="fas fa-trash"></i>
+                            <span>Clear Chat</span>
+                        </div>
+                        <div class="chat-option" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span>Toggle Notifications</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-embed">
+                        <script src="https://minnit.chat/js/embed.js" defer></script>
+                        <minnit-chat 
+                            data-chatname="https://organizations.minnit.chat/275310646090590/Main?embed&nickname=" 
+                            data-style="width:100%;height:100%;">
+                        </minnit-chat>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="powered-by-minnit">
+                Powered by Minnit Chat
+            </div>
         </div>
     </main>
 
     <script src="script.js"></script>
+    <script>
+        // Chat-specific JavaScript
+        let chatOptionsVisible = false;
+        let chatSidebarVisible = false;
+
+        function toggleChatOptions() {
+            const options = document.getElementById('chatOptions');
+            chatOptionsVisible = !chatOptionsVisible;
+            options.classList.toggle('show', chatOptionsVisible);
+        }
+
+        function toggleChatSidebar() {
+            const sidebar = document.getElementById('chatSidebar');
+            chatSidebarVisible = !chatSidebarVisible;
+            sidebar.classList.toggle('open', chatSidebarVisible);
+        }
+
+        function clearChat() {
+            if (confirm('Are you sure you want to clear the chat history?')) {
+                // Implement chat clearing logic here
+                showNotification('Chat history cleared');
+            }
+        }
+
+        function toggleNotifications() {
+            // Implement notifications toggle logic here
+            showNotification('Notifications settings updated');
+        }
+
+        // Hide loading screen when chat is loaded
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }, 1000);
+        });
+
+        // Close chat options when clicking outside
+        document.addEventListener('click', (e) => {
+            const options = document.getElementById('chatOptions');
+            if (!e.target.closest('.chat-controls') && !e.target.closest('.chat-options')) {
+                chatOptionsVisible = false;
+                options.classList.remove('show');
+            }
+        });
+    </script>
 </body>
 </html>
