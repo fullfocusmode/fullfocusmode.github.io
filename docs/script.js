@@ -72,6 +72,89 @@ function addQuickLink() {
     }
 }
 
+function initializeWebViewers() {
+    const webViewerContainer = document.getElementById('webViewerContainer');
+    if (!webViewerContainer) return;
+
+    webViewerContainer.innerHTML = '';
+
+    webViewers.forEach(viewer => {
+        const viewerElement = document.createElement('div');
+        viewerElement.className = 'web-viewer-item';
+        viewerElement.innerHTML = `
+            <button onclick="showWebViewer('${viewer.url}', '${viewer.title}')" class="web-viewer-btn">
+                <i class="fas fa-globe"></i>
+                <span>${viewer.title}</span>
+            </button>
+            <button onclick="deleteWebViewer(${viewer.id})" class="delete-viewer-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        webViewerContainer.appendChild(viewerElement);
+    });
+}
+
+function addWebViewer() {
+    const title = prompt('Enter embed title:');
+    const url = prompt('Enter embed URL:');
+    
+    if (title && url) {
+        const newViewer = {
+            id: Date.now(),
+            title: title,
+            url: url
+        };
+        
+        webViewers.push(newViewer);
+        localStorage.setItem('webViewers', JSON.stringify(webViewers));
+        initializeWebViewers();
+        showNotification('Web viewer added successfully!');
+    }
+}
+
+function showWebViewer(url, title) {
+    const modal = document.createElement('div');
+    modal.className = 'modal web-viewer-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>${title}</h2>
+                <button onclick="this.closest('.modal').remove()" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="web-viewer-frame">
+                <iframe src="${url}" 
+                        frameborder="0" 
+                        allowfullscreen
+                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms">
+                </iframe>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    setTimeout(() => modal.style.opacity = '1', 0);
+
+    // Add escape key listener for this modal
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+}
+
+function deleteWebViewer(id) {
+    if (!confirm('Are you sure you want to delete this web viewer?')) return;
+    
+    webViewers = webViewers.filter(viewer => viewer.id !== id);
+    localStorage.setItem('webViewers', JSON.stringify(webViewers));
+    initializeWebViewers();
+    showNotification('Web viewer deleted successfully!');
+}
+
 function getCurrentPage() {
     return window.location.pathname.split('/').pop() || 'index.html';
 }
