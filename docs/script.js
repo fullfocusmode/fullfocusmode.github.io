@@ -45,6 +45,33 @@ function initializeApp() {
     setTimeout(hideLoadingScreen, 1000);
 }
 
+function initializeQuickLinks() {
+    const quickLinksContainer = document.getElementById('quickLinksContainer');
+    if (!quickLinksContainer) return;
+
+    quickLinksContainer.innerHTML = '';
+
+    quickLinks.forEach(link => {
+        const linkElement = document.createElement('a');
+        linkElement.href = link.url;
+        linkElement.target = '_blank';
+        linkElement.textContent = link.title;
+        quickLinksContainer.appendChild(linkElement);
+    });
+}
+
+function addQuickLink() {
+    const title = prompt('Enter link title:');
+    const url = prompt('Enter URL:');
+    
+    if (title && url) {
+        quickLinks.push({ title, url });
+        localStorage.setItem('quickLinks', JSON.stringify(quickLinks));
+        initializeQuickLinks();
+        showNotification('Quick link added successfully!');
+    }
+}
+
 function getCurrentPage() {
     return window.location.pathname.split('/').pop() || 'index.html';
 }
