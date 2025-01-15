@@ -5,56 +5,223 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes - FullFocus TaskViewer</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <p>Loading Notes...</p>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
-        <button class="close-btn" onclick="toggleSidebar()">&times;</button>
-        <nav>
-            <a href="index.html" class="active">Tasks</a>
-            <a href="notes.html">Notes</a>
-            <a href="timer.html">Timer</a>
-            <a href="chatroom.html">Chatroom</a>
-        </nav>
-        <div class="quick-links">
-            <h3>Quick Links</h3>
-            <div id="quickLinksContainer"></div>
-            <button onclick="addQuickLink()" class="add-link-btn">Add Link</button>
+        <div class="sidebar-header">
+            <img src="https://via.placeholder.com/50" alt="Logo" class="logo">
+            <h2>FullFocus</h2>
+            <button class="close-btn" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <div class="web-viewer">
-            <h3>Web Viewer</h3>
-            <div id="webViewerContainer"></div>
-            <button onclick="addWebViewer()" class="add-viewer-btn">Add Embed</button>
+
+        <nav class="sidebar-nav">
+            <a href="index.html">
+                <i class="fas fa-tasks"></i>
+                <span>Tasks</span>
+            </a>
+            <a href="notes.html" class="active">
+                <i class="fas fa-sticky-note"></i>
+                <span>Notes</span>
+            </a>
+            <a href="timer.html">
+                <i class="fas fa-clock"></i>
+                <span>Timer</span>
+            </a>
+            <a href="chatroom.html">
+                <i class="fas fa-comments"></i>
+                <span>Chatroom</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-section">
+            <h3><i class="fas fa-link"></i> Quick Links</h3>
+            <div id="quickLinksContainer" class="quick-links-container"></div>
+            <button onclick="addQuickLink()" class="add-btn">
+                <i class="fas fa-plus"></i> Add Link
+            </button>
+        </div>
+
+        <div class="sidebar-section">
+            <h3><i class="fas fa-globe"></i> Web Viewer</h3>
+            <div id="webViewerContainer" class="web-viewer-container"></div>
+            <button onclick="addWebViewer()" class="add-btn">
+                <i class="fas fa-plus"></i> Add Embed
+            </button>
         </div>
     </div>
 
+    <!-- Main Content -->
     <main>
-        <header>
-            <button onclick="toggleSidebar()" class="menu-btn">☰</button>
-            <h1>Notes</h1>
+        <header class="main-header">
+            <div class="header-left">
+                <button onclick="toggleSidebar()" class="menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1><i class="fas fa-sticky-note"></i> Notes</h1>
+            </div>
+            <div class="header-right">
+                <div class="search-container">
+                    <input type="text" id="searchNotes" placeholder="Search notes...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="view-toggle">
+                    <button onclick="toggleView('grid')" class="active" id="gridViewBtn">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button onclick="toggleView('list')" id="listViewBtn">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
         </header>
 
-        <div class="notes-container">
-            <div id="notesGrid" class="notes-grid"></div>
-            <button onclick="openAddNoteModal()" class="add-btn">+ Add New Note</button>
+        <!-- Notes Categories -->
+        <div class="categories-container">
+            <button class="category-btn active" data-category="all">All Notes</button>
+            <button class="category-btn" data-category="personal">Personal</button>
+            <button class="category-btn" data-category="work">Work</button>
+            <button class="category-btn" data-category="ideas">Ideas</button>
+            <button onclick="addCategory()" class="category-btn add-category">
+                <i class="fas fa-plus"></i>
+            </button>
         </div>
+
+        <!-- Notes Container -->
+        <div class="notes-container grid-view" id="notesContainer">
+            <!-- Notes will be dynamically added here -->
+        </div>
+
+        <!-- Floating Action Button -->
+        <button onclick="openAddNoteModal()" class="floating-action-btn">
+            <i class="fas fa-plus"></i>
+        </button>
     </main>
 
-    <!-- Add Note Modal -->
-    <div id="addNoteModal" class="modal">
+    <!-- Add/Edit Note Modal -->
+    <div id="noteModal" class="modal">
         <div class="modal-content">
-            <h2>Add New Note</h2>
+            <div class="modal-header">
+                <h2><i class="fas fa-sticky-note"></i> <span id="modalTitle">Add New Note</span></h2>
+                <button onclick="closeModal('noteModal')" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <form id="noteForm">
-                <input type="text" id="noteTitle" placeholder="Note Title" required>
-                <textarea id="noteDescription" placeholder="Description" required></textarea>
-                <div class="modal-buttons">
-                    <button type="submit">Save</button>
-                    <button type="button" onclick="closeModal('addNoteModal')">Cancel</button>
+                <input type="hidden" id="noteId">
+                <div class="form-group">
+                    <label for="noteTitle">Title</label>
+                    <input type="text" id="noteTitle" required placeholder="Enter note title">
+                </div>
+                <div class="form-group">
+                    <label for="noteCategory">Category</label>
+                    <select id="noteCategory" required>
+                        <option value="personal">Personal</option>
+                        <option value="work">Work</option>
+                        <option value="ideas">Ideas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="noteContent">Content</label>
+                    <textarea id="noteContent" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="noteTags">Tags (comma separated)</label>
+                    <input type="text" id="noteTags" placeholder="Enter tags...">
+                </div>
+                <div class="form-group color-picker">
+                    <label>Note Color</label>
+                    <div class="color-options">
+                        <input type="radio" name="noteColor" value="#ffffff" checked>
+                        <input type="radio" name="noteColor" value="#ffcdd2">
+                        <input type="radio" name="noteColor" value="#c8e6c9">
+                        <input type="radio" name="noteColor" value="#bbdefb">
+                        <input type="radio" name="noteColor" value="#fff9c4">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('noteModal')" class="btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Note
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Note Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="previewTitle"></h2>
+                <button onclick="closeModal('previewModal')" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="note-preview">
+                <div class="note-metadata">
+                    <span class="category-badge" id="previewCategory"></span>
+                    <span class="date-badge" id="previewDate"></span>
+                </div>
+                <div class="note-content" id="previewContent"></div>
+                <div class="note-tags" id="previewTags"></div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="editNote(currentNoteId)" class="btn-secondary">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button onclick="deleteNote(currentNoteId)" class="btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="menu-item" onclick="previewNote(contextMenuNoteId)">
+            <i class="fas fa-eye"></i> Preview
+        </div>
+        <div class="menu-item" onclick="editNote(contextMenuNoteId)">
+            <i class="fas fa-edit"></i> Edit
+        </div>
+        <div class="menu-item" onclick="duplicateNote(contextMenuNoteId)">
+            <i class="fas fa-copy"></i> Duplicate
+        </div>
+        <div class="menu-separator"></div>
+        <div class="menu-item delete" onclick="deleteNote(contextMenuNoteId)">
+            <i class="fas fa-trash"></i> Delete
+        </div>
+    </div>
+
     <script src="script.js"></script>
+    <script>
+        // Initialize SimpleMDE
+        var simplemde = new SimpleMDE({ 
+            element: document.getElementById("noteContent"),
+            spellChecker: false,
+            autosave: {
+                enabled: true,
+                unique_id: "noteEditor"
+            }
+        });
+    </script>
 </body>
 </html>
