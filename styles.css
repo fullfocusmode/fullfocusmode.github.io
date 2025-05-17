@@ -392,6 +392,8 @@ body.dark-theme {
     border-radius: var(--border-radius);
     cursor: pointer;
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .calendar-day:hover {
@@ -634,7 +636,8 @@ body.dark-theme {
     display: grid; 
     grid-template-columns: repeat(7, 1fr); /* 7 columns for weekdays */ 
     gap: 5px; 
-}
+    width: 100%; /* Ensure the grid takes up the full width */ 
+} 
 
 @media (max-width: 576px) {
     #search-input {
