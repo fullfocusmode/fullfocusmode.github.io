@@ -1,4 +1,4 @@
-// Main script for kevitest.github.io
+// Main script for fullfocusmode.github.io
 document.addEventListener('DOMContentLoaded', function() {
     // Data management
     const TaskManager = {
@@ -18,47 +18,47 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         
         loadTasks: function() {
-            const storedTasks = localStorage.getItem('kevitest_tasks');
+            const storedTasks = localStorage.getItem('fullfocus_tasks');
             this.tasks = storedTasks ? JSON.parse(storedTasks) : [];
             this.renderTasks();
         },
         
         loadEmbeds: function() {
-            const storedEmbeds = localStorage.getItem('kevitest_embeds');
+            const storedEmbeds = localStorage.getItem('fullfocus_embeds');
             this.embeds = storedEmbeds ? JSON.parse(storedEmbeds) : [];
             this.renderEmbeds();
         },
         
         loadQuickLinks: function() {
-            const storedQuickLinks = localStorage.getItem('kevitest_quicklinks');
+            const storedQuickLinks = localStorage.getItem('fullfocus_quicklinks');
             this.quickLinks = storedQuickLinks ? JSON.parse(storedQuickLinks) : [];
             this.renderQuickLinks();
         },
         
         loadSettings: function() {
-            const storedSettings = localStorage.getItem('kevitest_settings');
+            const storedSettings = localStorage.getItem('fullfocus_settings');
             this.settings = storedSettings ? JSON.parse(storedSettings) : this.settings;
             this.applySettings();
         },
         
         saveTasks: function() {
-            localStorage.setItem('kevitest_tasks', JSON.stringify(this.tasks));
+            localStorage.setItem('fullfocus_tasks', JSON.stringify(this.tasks));
             this.renderTasks();
             this.renderCalendar();
         },
         
         saveEmbeds: function() {
-            localStorage.setItem('kevitest_embeds', JSON.stringify(this.embeds));
+            localStorage.setItem('fullfocus_embeds', JSON.stringify(this.embeds));
             this.renderEmbeds();
         },
         
         saveQuickLinks: function() {
-            localStorage.setItem('kevitest_quicklinks', JSON.stringify(this.quickLinks));
+            localStorage.setItem('fullfocus_quicklinks', JSON.stringify(this.quickLinks));
             this.renderQuickLinks();
         },
         
         saveSettings: function() {
-            localStorage.setItem('kevitest_settings', JSON.stringify(this.settings));
+            localStorage.setItem('fullfocus_settings', JSON.stringify(this.settings));
         },
         
         applySettings: function() {
@@ -523,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const exportLink = document.createElement('a');
             exportLink.setAttribute('href', dataUri);
-            exportLink.setAttribute('download', 'kevitest_backup.json');
+            exportLink.setAttribute('download', 'fullfocus_backup.json');
             document.body.appendChild(exportLink);
             exportLink.click();
             document.body.removeChild(exportLink);
@@ -563,10 +563,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         clearAllData: function() {
             if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-                localStorage.removeItem('kevitest_tasks');
-                localStorage.removeItem('kevitest_embeds');
-                localStorage.removeItem('kevitest_quicklinks');
-                localStorage.removeItem('kevitest_settings');
+                localStorage.removeItem('fullfocus_tasks');
+                localStorage.removeItem('fullfocus_embeds');
+                localStorage.removeItem('fullfocus_quicklinks');
+                localStorage.removeItem('fullfocus_settings');
                 
                 this.tasks = [];
                 this.embeds = [];
