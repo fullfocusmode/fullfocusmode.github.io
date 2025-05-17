@@ -625,6 +625,13 @@ body.dark-theme {
     }
 }
 
+/* Calendar styles */ 
+.calendar-grid { 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); /* 7 columns for weekdays */ 
+    gap: 5px; 
+}
+
 @media (max-width: 576px) {
     #search-input {
         width: 100px;
