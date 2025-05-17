@@ -92,26 +92,30 @@ document.addEventListener('DOMContentLoaded', function() {
             this.saveTasks();
         },
         
-        addEmbed: function(embed) {
-            embed.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
-            this.embeds.push(embed);
-            this.saveEmbeds();
-        },
+        addEmbed: function(embed) { 
+            embed.id = Date.now().toString(36) + Math.random().toString(36).substr(2); 
+            this.embeds.push(embed); 
+            this.saveEmbeds(); 
+            this.renderEmbeds(); //Added to update the UI immediately 
+        }, 
+
+        deleteEmbed: function(embedId) { 
+            this.embeds = this.embeds.filter(embed => embed.id !== embedId); 
+            this.saveEmbeds(); 
+            this.renderEmbeds(); //Added to update the UI immediately 
+        }, 
         
-        deleteEmbed: function(embedId) {
-            this.embeds = this.embeds.filter(embed => embed.id !== embedId);
-            this.saveEmbeds();
-        },
-        
-        addQuickLink: function(quickLink) {
-            quickLink.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
-            this.quickLinks.push(quickLink);
-            this.saveQuickLinks();
-        },
-        
-        deleteQuickLink: function(quickLinkId) {
-            this.quickLinks = this.quickLinks.filter(quickLink => quickLink.id !== quickLinkId);
-            this.saveQuickLinks();
+        addQuickLink: function(quickLink) { 
+            quickLink.id = Date.now().toString(36) + Math.random().toString(36).substr(2); 
+            this.quickLinks.push(quickLink); 
+            this.saveQuickLinks(); 
+            this.renderQuickLinks(); //Added to update the UI immediately 
+        }, 
+
+        deleteQuickLink: function(quickLinkId) { 
+            this.quickLinks = this.quickLinks.filter(quickLink => quickLink.id !== quickLinkId); 
+            this.saveQuickLinks(); 
+            this.renderQuickLinks(); //Added to update the UI immediately 
         },
         
         renderTasks: function() {
@@ -197,93 +201,93 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         
-        renderEmbeds: function() {
-            const embedsListEl = document.getElementById('embeds-list');
-            embedsListEl.innerHTML = '';
-            
-            if (this.embeds.length === 0) {
-                embedsListEl.innerHTML = '<div class="empty-message">No embeds added</div>';
-                return;
-            }
-            
-            this.embeds.forEach(embed => {
-                const embedEl = document.createElement('div');
-                embedEl.classList.add('embed-item');
-                embedEl.dataset.id = embed.id;
-                
-                const iconEl = document.createElement('i');
-                iconEl.className = 'fas fa-globe';
-                
-                const titleEl = document.createElement('span');
-                titleEl.textContent = embed.title;
-                
-                const deleteBtn = document.createElement('span');
-                deleteBtn.classList.add('delete-btn');
-                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-                
-                embedEl.appendChild(iconEl);
-                embedEl.appendChild(titleEl);
-                embedEl.appendChild(deleteBtn);
-                
-                // Add event listeners
-                embedEl.addEventListener('click', (e) => {
-                    if (!e.target.closest('.delete-btn')) {
-                        this.showEmbed(embed.id);
-                    }
-                });
-                
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.deleteEmbed(embed.id);
-                });
-                
-                embedsListEl.appendChild(embedEl);
-            });
-        },
+        renderEmbeds: function() { 
+            const embedsListEl = document.getElementById('embeds-list'); 
+            embedsListEl.innerHTML = ''; 
+
+            if (this.embeds.length === 0) { 
+                embedsListEl.innerHTML = '<div class="empty-message">No embeds added</div>'; 
+                return; 
+            } 
+
+            this.embeds.forEach(embed => { 
+                const embedEl = document.createElement('div'); 
+                embedEl.classList.add('embed-item'); 
+                embedEl.dataset.id = embed.id; 
+
+                const iconEl = document.createElement('i'); 
+                iconEl.className = 'fas fa-globe'; 
+
+                const titleEl = document.createElement('span'); 
+                titleEl.textContent = embed.title; 
+
+                const deleteBtn = document.createElement('span'); 
+                deleteBtn.classList.add('delete-btn'); 
+                deleteBtn.innerHTML = '<i class="fas fa-times"></i>'; 
+
+                embedEl.appendChild(iconEl); 
+                embedEl.appendChild(titleEl); 
+                embedEl.appendChild(deleteBtn); 
+
+                // Add event listeners 
+                embedEl.addEventListener('click', (e) => { 
+                    if (!e.target.closest('.delete-btn')) { 
+                        this.showEmbed(embed.id); 
+                    } 
+                }); 
+
+                deleteBtn.addEventListener('click', (e) => { 
+                    e.stopPropagation(); 
+                    this.deleteEmbed(embed.id); 
+                }); 
+
+                embedsListEl.appendChild(embedEl); 
+            }); 
+        }, 
         
-        renderQuickLinks: function() {
-            const quickLinksListEl = document.getElementById('quicklinks-list');
-            quickLinksListEl.innerHTML = '';
-            
-            if (this.quickLinks.length === 0) {
-                quickLinksListEl.innerHTML = '<div class="empty-message">No quick links added</div>';
-                return;
-            }
-            
-            this.quickLinks.forEach(link => {
-                const linkEl = document.createElement('div');
-                linkEl.classList.add('quicklink-item');
-                linkEl.dataset.id = link.id;
-                
-                const iconEl = document.createElement('i');
-                iconEl.className = 'fas fa-link';
-                
-                const titleEl = document.createElement('span');
-                titleEl.textContent = link.title;
-                
-                const deleteBtn = document.createElement('span');
-                deleteBtn.classList.add('delete-btn');
-                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-                
-                linkEl.appendChild(iconEl);
-                linkEl.appendChild(titleEl);
-                linkEl.appendChild(deleteBtn);
-                
-                // Add event listeners
-                linkEl.addEventListener('click', (e) => {
-                    if (!e.target.closest('.delete-btn')) {
-                        window.open(link.url, '_blank');
-                    }
-                });
-                
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.deleteQuickLink(link.id);
-                });
-                
-                quickLinksListEl.appendChild(linkEl);
-            });
-        },
+        renderQuickLinks: function() { 
+            const quickLinksListEl = document.getElementById('quicklinks-list'); 
+            quickLinksListEl.innerHTML = ''; 
+
+            if (this.quickLinks.length === 0) { 
+                quickLinksListEl.innerHTML = '<div class="empty-message">No quick links added</div>'; 
+                return; 
+            } 
+
+            this.quickLinks.forEach(link => { 
+                const linkEl = document.createElement('div'); 
+                linkEl.classList.add('quicklink-item'); 
+                linkEl.dataset.id = link.id; 
+
+                const iconEl = document.createElement('i'); 
+                iconEl.className = 'fas fa-link'; 
+
+                const titleEl = document.createElement('span'); 
+                titleEl.textContent = link.title; 
+
+                const deleteBtn = document.createElement('span'); 
+                deleteBtn.classList.add('delete-btn'); 
+                deleteBtn.innerHTML = '<i class="fas fa-times"></i>'; 
+
+                linkEl.appendChild(iconEl); 
+                linkEl.appendChild(titleEl); 
+                linkEl.appendChild(deleteBtn); 
+
+                // Add event listeners 
+                linkEl.addEventListener('click', (e) => { 
+                    if (!e.target.closest('.delete-btn')) { 
+                        window.open(link.url, '_blank'); 
+                    } 
+                }); 
+
+                deleteBtn.addEventListener('click', (e) => { 
+                    e.stopPropagation(); 
+                    this.deleteQuickLink(link.id); 
+                }); 
+
+                quickLinksListEl.appendChild(linkEl); 
+            }); 
+        }, 
         
         renderCalendar: function() {
             const calendarEl = document.getElementById('calendar');
@@ -460,17 +464,17 @@ document.addEventListener('DOMContentLoaded', function() {
             openModal('calendar-day-modal');
         },
         
-        showEmbed: function(embedId) {
-            const embed = this.embeds.find(e => e.id === embedId);
-            if (!embed) return;
-            
-            // Set embed details in modal
-            document.getElementById('embed-viewer-title').textContent = embed.title;
-            document.getElementById('embed-iframe').src = embed.url;
-            
-            // Show modal
-            openModal('embed-viewer');
-        },
+        showEmbed: function(embedId) { 
+            const embed = this.embeds.find(e => e.id === embedId); 
+            if (!embed) return; 
+
+            // Set embed details in modal 
+            document.getElementById('embed-viewer-title').textContent = embed.title; 
+            document.getElementById('embed-iframe').src = embed.url; 
+
+            // Show modal 
+            openModal('embed-viewer'); 
+        }, 
         
         searchTasks: function(query) {
             query = query.toLowerCase();
