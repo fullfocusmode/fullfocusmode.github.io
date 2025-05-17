@@ -289,20 +289,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }); 
         }, 
         
-        renderCalendar: function() { 
+         TaskManager.renderCalendar = function() { 
             const calendarEl = document.getElementById('calendar'); 
             if (!calendarEl) return; 
-
+    
             const date = new Date(); 
             let currentMonth = date.getMonth(); 
             const currentYear = date.getFullYear(); 
-
+    
             // Clear existing calendar 
             calendarEl.innerHTML = ''; 
-            
-            // Create calendar header
-            const headerEl = document.createElement('div');
-            headerEl.classList.add('calendar-header');
+    
+            // Create calendar header 
+            const headerEl = document.createElement('div'); 
+            headerEl.classList.add('calendar-header'); 
             
             const navEl = document.createElement('div');
             navEl.classList.add('calendar-nav');
@@ -325,78 +325,53 @@ document.addEventListener('DOMContentLoaded', function() {
             headerEl.appendChild(monthYearEl);
             headerEl.appendChild(navEl);
             
-            calendarEl.appendChild(headerEl);
-            
-            // Create weekday headers
-            const weekdaysEl = document.createElement('div');
-            weekdaysEl.classList.add('calendar-weekdays');
-            
-            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            weekdays.forEach(day => {
-                const dayEl = document.createElement('div');
-                dayEl.textContent = day;
-                weekdaysEl.appendChild(dayEl);
-            });
-            
-            calendarEl.appendChild(weekdaysEl);
-            
-            // Create calendar days 
-            const firstDay = new Date(currentYear, currentMonth, 1).getDay(); 
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); 
+            calendarEl.appendChild(headerEl); 
 
-            // Calculate tasks by date 
+            // Create weekday headers (remains the same) 
+            calendarEl.appendChild(weekdaysEl); 
+    
+            // Create calendar days 
+            const firstDay = (new Date(currentYear, currentMonth, 1)).getDay(); 
+            const lastDay = (new Date(currentYear, currentMonth + 1, 0)).getDate(); 
+    
             const tasksByDate = {}; 
-            this.tasks.forEach(task => { 
-                if (task.type === 'categorized' && task.date) { 
+            this.tasks.filter(task => task.type === 'categorized').forEach(task => { 
+                if (task.date) { 
                     const dateStr = task.date.split('T')[0]; 
-                    if (!tasksByDate[dateStr]) { 
-                        tasksByDate[dateStr] = []; 
-                    } 
+                    tasksByDate[dateStr] = tasksByDate[dateStr] || []; 
                     tasksByDate[dateStr].push(task); 
                 } 
             }); 
-
-            let day = 1; 
-            const today = new Date(); 
-            const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear; 
-
-            //Dynamically create grid cells 
+    
             const calendarGrid = document.createElement('div'); 
             calendarGrid.classList.add('calendar-grid'); 
-
-            // Add empty cells for days before first day of month 
+    
+            // Add empty cells before the first day of the month 
             for (let i = 0; i < firstDay; i++) { 
-                const emptyEl = document.createElement('div'); 
-                emptyEl.classList.add('calendar-day', 'empty'); 
-                calendarGrid.appendChild(emptyEl); 
+                const emptyCell = document.createElement('div'); 
+                emptyCell.classList.add('calendar-day', 'empty'); 
+                calendarGrid.appendChild(emptyCell); 
             } 
-
+    
             // Add days of the month 
-            while (day <= daysInMonth) { 
+            for (let day = 1; day <= lastDay; day++) { 
                 const dayEl = document.createElement('div'); 
                 dayEl.classList.add('calendar-day'); 
                 dayEl.textContent = day; 
-
-                // Check if this day is today 
-                if (isCurrentMonth && day === today.getDate()) { 
-                    dayEl.classList.add('today'); 
-                } 
-
-                // Check if this day has tasks 
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; 
+    
+                const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`; 
                 if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
                     dayEl.classList.add('has-tasks'); 
-
-                    // Add event listener to show tasks for this day 
                     dayEl.addEventListener('click', () => this.showTasksForDay(dateStr)); 
                 } 
-
-                calendarGrid.appendChild(dayEl); // Append to calendarGrid 
-                day++; 
+                if (new Date().getDate() === day && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear) { 
+                    dayEl.classList.add('today'); 
+                } 
+                calendarGrid.appendChild(dayEl); 
             } 
-
-            calendarEl.appendChild(calendarGrid); // Append calendarGrid to calendarEl 
-        }, 
+    
+            calendarEl.appendChild(calendarGrid); 
+        };
         
         changeMonth: function(diff) {
             const date = new Date();
