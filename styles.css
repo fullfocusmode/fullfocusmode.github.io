@@ -15,6 +15,7 @@
     --text-light: #666;
     --bg-color: #f5f5f5;
     --card-bg: #fff;
+    --cancel: #ddd;
     --sidebar-width: 270px;
     --topbar-height: 60px;
     --border-radius: 8px;
@@ -35,6 +36,7 @@ body.dark-theme {
     --text-color: #e0e0e0;
     --text-light: #aaa;
     --bg-color: #1f1f1f;
+    --cancel: #1f1f1f;
     --card-bg: #2d2d2d;
     --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
@@ -501,7 +503,7 @@ body.dark-theme {
 }
 
 .form-buttons button.cancel-btn {
-    background-color: #ddd;
+    background-color: var(--cancel);
     color: var(--text-color);
 }
 
