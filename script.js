@@ -289,15 +289,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }); 
         }, 
         
-        renderCalendar: function() {
-            const calendarEl = document.getElementById('calendar');
-            if (!calendarEl) return;
-            
-            const date = new Date();
-            const currentMonth = date.getMonth();
-            const currentYear = date.getFullYear();
-            
-            // Clear existing calendar
+        renderCalendar: function() { 
+            const calendarEl = document.getElementById('calendar'); 
+            if (!calendarEl) return; 
+        
+            const date = new Date(); 
+            let currentMonth = date.getMonth(); 
+            const currentYear = date.getFullYear(); 
+        
+            // Clear existing calendar 
             calendarEl.innerHTML = '';
             
             // Create calendar header
@@ -340,37 +340,31 @@ document.addEventListener('DOMContentLoaded', function() {
             
             calendarEl.appendChild(weekdaysEl);
             
-            // Create calendar days
-            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            
-            // Calculate tasks by date
-            const tasksByDate = {};
-            this.tasks.forEach(task => {
-                if (task.type === 'categorized' && task.date) {
-                    const dateStr = task.date.split('T')[0];
-                    if (!tasksByDate[dateStr]) {
-                        tasksByDate[dateStr] = [];
-                    }
-                    tasksByDate[dateStr].push(task);
-                }
-            });
-            
-            let day = 1;
-            const today = new Date();
-            const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear;
-            
-            // Add empty cells for days before first day of month
-            for (let i = 0; i < firstDay; i++) {
-                const emptyEl = document.createElement('div');
-                emptyEl.classList.add('calendar-day', 'empty');
-                calendarEl.appendChild(emptyEl);
-            }
-            
-            // Add days of the month
-            while (day <= daysInMonth) {
-                const dayEl = document.createElement('div');
-                dayEl.classList.add('calendar-day');
+            // Create calendar days 
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay(); 
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); 
+        
+            // Calculate tasks by date (remains the same) 
+        
+            let day = 1; 
+            const today = new Date(); 
+            const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear; 
+        
+            //Dynamically create grid cells 
+            const calendarGrid = document.createElement('div'); 
+            calendarGrid.classList.add('calendar-grid'); 
+        
+            // Add empty cells for days before first day of month 
+            for (let i = 0; i < firstDay; i++) { 
+                const emptyEl = document.createElement('div'); 
+                emptyEl.classList.add('calendar-day', 'empty'); 
+                calendarGrid.appendChild(emptyEl); 
+            } 
+        
+            // Add days of the month 
+            while (day <= daysInMonth) { 
+                const dayEl = document.createElement('div'); 
+                dayEl.classList.add('calendar-day'); 
                 dayEl.textContent = day;
                 
                 // Check if this day is today
@@ -390,6 +384,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 calendarEl.appendChild(dayEl);
                 day++;
             }
+
+            calendarEl.appendChild(calendarGrid); 
         },
         
         changeMonth: function(diff) {
