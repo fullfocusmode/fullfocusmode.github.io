@@ -39,7 +39,7 @@ body.dark-theme {
     --text-light: #aaa;
     --bg-color: #1f1f1f;
     --cancel: #1f1f1f;
-    --outline: #000000;
+    --outline: #000;
     --card-bg: #2d2d2d;
     --danger: #730d06;
     --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
