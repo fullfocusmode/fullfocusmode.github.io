@@ -16,6 +16,7 @@
     --bg-color: #f5f5f5;
     --card-bg: #fff;
     --cancel: #ddd;
+    --outline: #ddd;
     --sidebar-width: 270px;
     --topbar-height: 60px;
     --border-radius: 8px;
@@ -37,6 +38,7 @@ body.dark-theme {
     --text-light: #aaa;
     --bg-color: #1f1f1f;
     --cancel: #1f1f1f;
+    --outline: #2d2d2d;
     --card-bg: #2d2d2d;
     --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
@@ -210,7 +212,7 @@ body.dark-theme {
 #search-input {
     flex-grow: 1;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--outline);
     border-radius: var(--border-radius) 0 0 var(--border-radius);
     outline: none;
     background-color: var(--card-bg);
@@ -525,7 +527,7 @@ body.dark-theme {
 
 #theme-selector {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--outline);
     border-radius: var(--border-radius);
     background-color: var(--card-bg);
     color: var(--text-color);
