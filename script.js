@@ -467,11 +467,12 @@ document.addEventListener('DOMContentLoaded', function() {
         showEmbed: function(embedId) { 
             const embed = this.embeds.find(e => e.id === embedId); 
             if (!embed) return; 
-
+        
             // Set embed details in modal 
             document.getElementById('embed-viewer-title').textContent = embed.title; 
-            document.getElementById('embed-iframe').src = embed.url; 
-
+            //This line was the problem.  It needs to set the src attribute of the iframe. 
+            document.getElementById('embed-iframe').src = embed.url;  
+        
             // Show modal 
             openModal('embed-viewer'); 
         }, 
