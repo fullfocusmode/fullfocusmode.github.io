@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeviTest Task Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>KeviTest</h2>
+            <button id="close-sidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-menu">
+            <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+            <a href="notes.html"><i class="fas fa-sticky-note"></i> Notes</a>
+            <a href="timer.html"><i class="fas fa-clock"></i> Timer</a>
+            <a href="chatroom.html"><i class="fas fa-comments"></i> Chatroom</a>
+        </div>
+        <div class="sidebar-section">
+            <h3>WebViewer</h3>
+            <div id="embeds-list">
+                <!-- Embeds will be loaded here -->
+            </div>
+            <button id="add-embed-btn"><i class="fas fa-plus"></i> Add Embed</button>
+        </div>
+        <div class="sidebar-section">
+            <h3>Quick Links</h3>
+            <div id="quicklinks-list">
+                <!-- Quick links will be loaded here -->
+            </div>
+            <button id="add-quicklink-btn"><i class="fas fa-plus"></i> Add Quick Link</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <button id="toggle-sidebar"><i class="fas fa-bars"></i></button>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search tasks...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="topbar-actions">
+                <button id="new-task-btn"><i class="fas fa-plus"></i> New Task</button>
+                <button id="settings-btn"><i class="fas fa-cog"></i></button>
+            </div>
+        </div>
+
+        <div class="tasks-container">
+            <div class="tasks-row">
+                <div class="tasks-column">
+                    <h2>Categorized Tasks</h2>
+                    <div id="categorized-tasks" class="tasks-list">
+                        <!-- Categorized tasks will be loaded here -->
+                    </div>
+                </div>
+                <div class="tasks-column">
+                    <h2>Uncategorized Tasks</h2>
+                    <div id="uncategorized-tasks" class="tasks-list">
+                        <!-- Uncategorized tasks will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="calendar-row">
+                <div class="calendar-container">
+                    <h2>Calendar</h2>
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="new-task-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create New Task</h2>
+            <form id="new-task-form">
+                <div class="form-group">
+                    <label for="task-title">Title:</label>
+                    <input type="text" id="task-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-description">Description:</label>
+                    <textarea id="task-description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="task-type">Type:</label>
+                    <select id="task-type">
+                        <option value="uncategorized">Uncategorized</option>
+                        <option value="categorized">Categorized</option>
+                    </select>
+                </div>
+                <div class="form-group date-group" style="display: none;">
+                    <label for="task-date">Date:</label>
+                    <input type="date" id="task-date">
+                </div>
+                <div class="form-group">
+                    <label for="task-priority">Priority:</label>
+                    <select id="task-priority">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="settings-section">
+                <h3>Theme</h3>
+                <select id="theme-selector">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+            <div class="settings-section">
+                <h3>Data Management</h3>
+                <button id="export-data">Export Data</button>
+                <button id="import-data">Import Data</button>
+                <button id="clear-data" class="danger">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="embed-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Web Embed</h2>
+            <form id="embed-form">
+                <div class="form-group">
+                    <label for="embed-title">Title:</label>
+                    <input type="text" id="embed-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="embed-url">URL:</label>
+                    <input type="url" id="embed-url" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit">Add</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="quicklink-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Quick Link</h2>
+            <form id="quicklink-form">
+                <div class="form-group">
+                    <label for="quicklink-title">Title:</label>
+                    <input type="text" id="quicklink-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="quicklink-url">URL:</label>
+                    <input type="url" id="quicklink-url" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit">Add</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="embed-viewer" class="modal">
+        <div class="modal-content embed-viewer-content">
+            <span class="close">&times;</span>
+            <h2 id="embed-viewer-title">Web Embed</h2>
+            <div id="embed-viewer-container">
+                <iframe id="embed-iframe" src="" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div id="task-detail-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="task-detail-title">Task Details</h2>
+            <div id="task-detail-date" class="task-detail-item"></div>
+            <div id="task-detail-priority" class="task-detail-item"></div>
+            <div id="task-detail-description" class="task-detail-item"></div>
+            <div class="form-buttons">
+                <button id="edit-task-btn">Edit</button>
+                <button id="delete-task-btn" class="danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="calendar-day-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="calendar-day-title">Tasks for <span id="selected-date"></span></h2>
+            <div id="day-tasks-list">
+                <!-- Tasks for the selected day will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
