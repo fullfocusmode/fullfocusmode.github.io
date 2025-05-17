@@ -29,7 +29,7 @@ body {
 }
 
 body.dark-theme {
-    --primary-color: #5383c3;
+    --primary-color: #0f284d;
     --primary-light: #6989bb;
     --primary-dark: #3a6ca8;
     --secondary-color: #ffc107;
