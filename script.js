@@ -289,17 +289,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }); 
         }, 
         
-         TaskManager.renderCalendar = function() { 
+        renderCalendar: function() { 
             const calendarEl = document.getElementById('calendar'); 
             if (!calendarEl) return; 
-    
-            const date = new Date(); 
-            let currentMonth = date.getMonth(); 
-            const currentYear = date.getFullYear(); 
-    
-            // Clear existing calendar 
+        
+            const today = new Date(); 
+            const currentMonth = today.getMonth(); 
+            const currentYear = today.getFullYear(); 
+        
             calendarEl.innerHTML = ''; 
-    
+        
             // Create calendar header 
             const headerEl = document.createElement('div'); 
             headerEl.classList.add('calendar-header'); 
@@ -327,13 +326,20 @@ document.addEventListener('DOMContentLoaded', function() {
             
             calendarEl.appendChild(headerEl); 
 
-            // Create weekday headers (remains the same) 
+            // Create weekday headers 
+            const weekdaysEl = document.createElement('div'); 
+            weekdaysEl.classList.add('calendar-weekdays'); 
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; 
+            weekdays.forEach(day => { 
+                const dayEl = document.createElement('div'); 
+                dayEl.textContent = day; 
+                weekdaysEl.appendChild(dayEl); 
+            }); 
             calendarEl.appendChild(weekdaysEl); 
-    
-            // Create calendar days 
+        
             const firstDay = (new Date(currentYear, currentMonth, 1)).getDay(); 
             const lastDay = (new Date(currentYear, currentMonth + 1, 0)).getDate(); 
-    
+        
             const tasksByDate = {}; 
             this.tasks.filter(task => task.type === 'categorized').forEach(task => { 
                 if (task.date) { 
@@ -342,23 +348,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     tasksByDate[dateStr].push(task); 
                 } 
             }); 
-    
+        
             const calendarGrid = document.createElement('div'); 
             calendarGrid.classList.add('calendar-grid'); 
-    
+        
             // Add empty cells before the first day of the month 
             for (let i = 0; i < firstDay; i++) { 
                 const emptyCell = document.createElement('div'); 
                 emptyCell.classList.add('calendar-day', 'empty'); 
                 calendarGrid.appendChild(emptyCell); 
             } 
-    
+        
             // Add days of the month 
             for (let day = 1; day <= lastDay; day++) { 
                 const dayEl = document.createElement('div'); 
                 dayEl.classList.add('calendar-day'); 
                 dayEl.textContent = day; 
-    
+        
                 const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`; 
                 if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
                     dayEl.classList.add('has-tasks'); 
@@ -369,17 +375,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 } 
                 calendarGrid.appendChild(dayEl); 
             } 
-    
-            calendarEl.appendChild(calendarGrid); 
-        };
         
-        changeMonth: function(diff) {
-            const date = new Date();
-            date.setMonth(date.getMonth() + diff);
-            // Save current month and year to state
-            this.currentMonth = date.getMonth();
-            this.currentYear = date.getFullYear();
-            this.renderCalendar();
+            calendarEl.appendChild(calendarGrid); 
+        },
+        
+        changeMonth: function(diff) { 
+            const date = new Date(); 
+            date.setMonth(date.getMonth() + diff); 
+            this.renderCalendar(); // Call renderCalendar to update the view 
         },
         
         getMonthName: function(month) {
