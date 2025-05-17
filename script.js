@@ -292,13 +292,13 @@ document.addEventListener('DOMContentLoaded', function() {
         renderCalendar: function() { 
             const calendarEl = document.getElementById('calendar'); 
             if (!calendarEl) return; 
-        
+
             const date = new Date(); 
             let currentMonth = date.getMonth(); 
             const currentYear = date.getFullYear(); 
-        
+
             // Clear existing calendar 
-            calendarEl.innerHTML = '';
+            calendarEl.innerHTML = ''; 
             
             // Create calendar header
             const headerEl = document.createElement('div');
@@ -343,50 +343,60 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create calendar days 
             const firstDay = new Date(currentYear, currentMonth, 1).getDay(); 
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); 
-        
-            // Calculate tasks by date (remains the same) 
-        
+
+            // Calculate tasks by date 
+            const tasksByDate = {}; 
+            this.tasks.forEach(task => { 
+                if (task.type === 'categorized' && task.date) { 
+                    const dateStr = task.date.split('T')[0]; 
+                    if (!tasksByDate[dateStr]) { 
+                        tasksByDate[dateStr] = []; 
+                    } 
+                    tasksByDate[dateStr].push(task); 
+                } 
+            }); 
+
             let day = 1; 
             const today = new Date(); 
             const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear; 
-        
+
             //Dynamically create grid cells 
             const calendarGrid = document.createElement('div'); 
             calendarGrid.classList.add('calendar-grid'); 
-        
+
             // Add empty cells for days before first day of month 
             for (let i = 0; i < firstDay; i++) { 
                 const emptyEl = document.createElement('div'); 
                 emptyEl.classList.add('calendar-day', 'empty'); 
                 calendarGrid.appendChild(emptyEl); 
             } 
-        
+
             // Add days of the month 
             while (day <= daysInMonth) { 
                 const dayEl = document.createElement('div'); 
                 dayEl.classList.add('calendar-day'); 
-                dayEl.textContent = day;
-                
-                // Check if this day is today
-                if (isCurrentMonth && day === today.getDate()) {
-                    dayEl.classList.add('today');
-                }
-                
-                // Check if this day has tasks
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) {
-                    dayEl.classList.add('has-tasks');
-                    
-                    // Add event listener to show tasks for this day
-                    dayEl.addEventListener('click', () => this.showTasksForDay(dateStr));
-                }
-                
-                calendarEl.appendChild(dayEl);
-                day++;
-            }
+                dayEl.textContent = day; 
 
-            calendarEl.appendChild(calendarGrid); 
-        },
+                // Check if this day is today 
+                if (isCurrentMonth && day === today.getDate()) { 
+                    dayEl.classList.add('today'); 
+                } 
+
+                // Check if this day has tasks 
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; 
+                if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
+                    dayEl.classList.add('has-tasks'); 
+
+                    // Add event listener to show tasks for this day 
+                    dayEl.addEventListener('click', () => this.showTasksForDay(dateStr)); 
+                } 
+
+                calendarGrid.appendChild(dayEl); // Append to calendarGrid 
+                day++; 
+            } 
+
+            calendarEl.appendChild(calendarGrid); // Append calendarGrid to calendarEl 
+        }, 
         
         changeMonth: function(diff) {
             const date = new Date();
@@ -795,13 +805,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Handle delete task button
-        document.getElementById('delete-task-btn').addEventListener('click', function() {
-            const taskId = this.dataset.id;
-            if (confirm('Are you sure you want to delete this task?')) {
-                TaskManager.deleteTask(taskId);
-                closeCurrentModal();
-            }
+        // Handle delete task button 
+        document.getElementById('delete-task-btn').addEventListener('click', function() { 
+            const taskId = this.dataset.id; 
+            TaskManager.deleteTask(taskId); 
+            closeCurrentModal(); // Close modal after deleting 
         });
     }
     
