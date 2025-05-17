@@ -478,7 +478,7 @@ body.dark-theme {
 .form-group select {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--outline);
     border-radius: var(--border-radius);
     background-color: var(--card-bg);
     color: var(--text-color);
