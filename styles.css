@@ -17,6 +17,7 @@
     --card-bg: #fff;
     --cancel: #ddd;
     --outline: #ddd;
+    --danger: #f44336;
     --sidebar-width: 270px;
     --topbar-height: 60px;
     --border-radius: 8px;
@@ -40,6 +41,7 @@ body.dark-theme {
     --cancel: #1f1f1f;
     --outline: #2d2d2d;
     --card-bg: #2d2d2d;
+    --danger: #730d06;
     --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -510,7 +512,7 @@ body.dark-theme {
 }
 
 .form-buttons button.danger {
-    background-color: #f44336;
+    background-color: var(--danger);
     color: white;
 }
 
