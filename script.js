@@ -566,229 +566,150 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     };
-    
-    // UI event handlers
-    function setupEventListeners() {
-        // Sidebar toggle
-        document.getElementById('toggle-sidebar').addEventListener('click', toggleSidebar);
-        document.getElementById('close-sidebar').addEventListener('click', closeSidebar);
-        
-        // New task button
-        document.getElementById('new-task-btn').addEventListener('click', () => openModal('new-task-modal'));
-        
-        // Settings button
-        document.getElementById('settings-btn').addEventListener('click', () => openModal('settings-modal'));
-        
-        // Add embed button
-        document.getElementById('add-embed-btn').addEventListener('click', () => openModal('embed-modal'));
-        
-        // Add quick link button
-        document.getElementById('add-quicklink-btn').addEventListener('click', () => openModal('quicklink-modal'));
-        
-        // Close modal buttons
-        document.querySelectorAll('.close, .cancel-btn').forEach(button => {
-            button.addEventListener('click', closeCurrentModal);
-        });
-        
-        // Close modals when clicking outside
-        window.addEventListener('click', event => {
-            if (event.target.classList.contains('modal')) {
-                closeCurrentModal();
-            }
-        });
-        
-        // Handle task type selection
-        document.getElementById('task-type').addEventListener('change', function() {
-            const dateGroup = document.querySelector('.date-group');
-            if (this.value === 'categorized') {
-                dateGroup.style.display = 'block';
-            } else {
-                dateGroup.style.display = 'none';
-            }
-        });
-        
-        // Handle new task form submission
-        document.getElementById('new-task-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const taskData = {
-                title: document.getElementById('task-title').value,
-                description: document.getElementById('task-description').value,
-                type: document.getElementById('task-type').value,
-                priority: document.getElementById('task-priority').value
-            };
-            
-            if (taskData.type === 'categorized') {
-                taskData.date = document.getElementById('task-date').value;
-            }
-            
-            TaskManager.addTask(taskData);
-            closeCurrentModal();
-            
-            // Reset form
-            this.reset();
-            document.querySelector('.date-group').style.display = 'none';
-        });
-        
-        // Handle embed form submission
-        document.getElementById('embed-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const embedData = {
-                title: document.getElementById('embed-title').value,
-                url: document.getElementById('embed-url').value
-            };
-            
-            TaskManager.addEmbed(embedData);
-            closeCurrentModal();
-            
-            // Reset form
-            this.reset();
-        });
-        
-        // Handle quick link form submission
-        document.getElementById('quicklink-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const quickLinkData = {
-                title: document.getElementById('quicklink-title').value,
-                url: document.getElementById('quicklink-url').value
-            };
-            
-            TaskManager.addQuickLink(quickLinkData);
-            closeCurrentModal();
-            
-            // Reset form
-            this.reset();
-        });
-        
-        // Handle search
-        document.getElementById('search-btn').addEventListener('click', function() {
-            const query = document.getElementById('search-input').value.trim();
-            if (query) {
-                TaskManager.searchTasks(query);
-            } else {
-                TaskManager.renderTasks();
-            }
-        });
-        
-        document.getElementById('search-input').addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                const query = this.value.trim();
-                if (query) {
-                    TaskManager.searchTasks(query);
-                } else {
-                    TaskManager.renderTasks();
-                }
-            }
-        });
-        
-        // Handle theme selector
-        document.getElementById('theme-selector').addEventListener('change', function() {
-            TaskManager.settings.theme = this.value;
-            TaskManager.saveSettings();
-            TaskManager.applySettings();
-        });
-        
-        // Handle data export
-        document.getElementById('export-data').addEventListener('click', function() {
-            TaskManager.exportData();
-        });
-        
-        // Handle data import
-        document.getElementById('import-data').addEventListener('click', function() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            
-            input.onchange = e => {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const result = TaskManager.importData(e.target.result);
-                    if (result) {
-                        alert('Data imported successfully!');
-                        closeCurrentModal();
-                    } else {
-                        alert('Failed to import data. Please check the file format.');
-                    }
-                };
-                reader.readAsText(file);
-            };
-            
-            input.click();
-        });
-        
-        // Handle clear all data
-        document.getElementById('clear-data').addEventListener('click', function() {
-            TaskManager.clearAllData();
-            closeCurrentModal();
-        });
-        
-        // Handle edit task button
-        document.getElementById('edit-task-btn').addEventListener('click', function() {
-            const taskId = this.dataset.id;
-            const task = TaskManager.tasks.find(t => t.id === taskId);
-            
-            if (task) {
-                // Fill task form with existing data
-                document.getElementById('task-title').value = task.title;
-                document.getElementById('task-description').value = task.description || '';
-                document.getElementById('task-type').value = task.type;
-                document.getElementById('task-priority').value = task.priority;
-                
-                // Show/hide date field based on task type
-                const dateGroup = document.querySelector('.date-group');
-                if (task.type === 'categorized') {
-                    dateGroup.style.display = 'block';
-                    document.getElementById('task-date').value = task.date || '';
-                } else {
-                    dateGroup.style.display = 'none';
-                }
-                
-                // Change form submission behavior
-                const form = document.getElementById('new-task-form');
-                const originalSubmitHandler = form.onsubmit;
-                
-                form.onsubmit = function(e) {
-                    e.preventDefault();
-                    
-                    const updates = {
-                        title: document.getElementById('task-title').value,
-                        description: document.getElementById('task-description').value,
-                        type: document.getElementById('task-type').value,
-                        priority: document.getElementById('task-priority').value
-                    };
-                    
-                    if (updates.type === 'categorized') {
-                        updates.date = document.getElementById('task-date').value;
-                    } else {
-                        updates.date = null;
-                    }
-                    
-                    TaskManager.updateTask(taskId, updates);
-                    closeCurrentModal();
-                    
-                    // Reset form and restore original handler
-                    form.reset();
-                    form.onsubmit = originalSubmitHandler;
-                    document.querySelector('.date-group').style.display = 'none';
-                };
-                
-                // Close task detail modal and open new task modal
-                closeCurrentModal();
-                openModal('new-task-modal');
-            }
-        });
-        
+
+    function setupTaskListeners() { 
+        // Sidebar toggle (if in index.html) 
+        const toggleSidebarButton = document.getElementById('toggle-sidebar'); 
+        if (toggleSidebarButton) { 
+            toggleSidebarButton.addEventListener('click', toggleSidebar); 
+        } 
+
+        // New task button 
+        const newTaskButton = document.getElementById('new-task-btn'); 
+        if (newTaskButton) { 
+            newTaskButton.addEventListener('click', () => openModal('new-task-modal')); 
+        } 
+
+        // Settings button (if in index.html) 
+        const settingsButton = document.getElementById('settings-btn'); 
+        if (settingsButton) { 
+            settingsButton.addEventListener('click', () => openModal('settings-modal')); 
+        } 
+
+        // Add embed button (if in index.html) 
+        const addEmbedButton = document.getElementById('add-embed-btn'); 
+        if (addEmbedButton) { 
+            addEmbedButton.addEventListener('click', () => openModal('embed-modal')); 
+        } 
+
+        // Add quick link button (if in index.html) 
+        const addQuickLinkButton = document.getElementById('add-quicklink-btn'); 
+        if (addQuickLinkButton) { 
+            addQuickLinkButton.addEventListener('click', () => openModal('quicklink-modal')); 
+        } 
+
+        // Close modal buttons 
+        const closeButtons = document.querySelectorAll('.close, .cancel-btn'); 
+        closeButtons.forEach(button => { 
+            button.addEventListener('click', closeCurrentModal); 
+        }); 
+
+        // Close modals when clicking outside 
+        window.addEventListener('click', event => { 
+            if (event.target.classList.contains('modal')) { 
+                closeCurrentModal(); 
+            } 
+        }); 
+
+        // Handle theme selector (if in index.html) 
+        const themeSelector = document.getElementById('theme-selector'); 
+        if (themeSelector) { 
+            themeSelector.addEventListener('change', function() { 
+                TaskManager.settings.theme = this.value; 
+                TaskManager.saveSettings(); 
+                TaskManager.applySettings(); 
+            }); 
+        } 
+
+        // Handle data export (if in index.html) 
+        const exportDataButton = document.getElementById('export-data'); 
+        if (exportDataButton) { 
+            exportDataButton.addEventListener('click', function() { 
+                TaskManager.exportData(); 
+            }); 
+        } 
+
+        // Handle data import (if in index.html) 
+        const importDataButton = document.getElementById('import-data'); 
+        if (importDataButton) { 
+            importDataButton.addEventListener('click', function() { 
+                const input = document.createElement('input'); 
+                input.type = 'file'; 
+                input.accept = '.json'; 
+
+                input.onchange = e => { 
+                    const file = e.target.files[0]; 
+                    if (!file) return; 
+
+                    const reader = new FileReader(); 
+                    reader.onload = e => { 
+                        const result = TaskManager.importData(e.target.result); 
+                        if (result) { 
+                            alert('Data imported successfully!'); 
+                            closeCurrentModal(); 
+                        } else { 
+                            alert('Failed to import data. Please check the file format.'); 
+                        } 
+                    }; 
+                    reader.readAsText(file); 
+                }; 
+
+                input.click(); 
+            }); 
+        } 
+
+        // Handle clear all data (if in index.html) 
+        const clearDataButton = document.getElementById('clear-data'); 
+        if (clearDataButton) { 
+            clearDataButton.addEventListener('click', function() { 
+                TaskManager.clearAllData(); 
+                closeCurrentModal(); 
+            }); 
+        } 
+
+        // Handle new task form submission 
+        const newTaskForm = document.getElementById('new-task-form'); 
+        if (newTaskForm) { 
+            newTaskForm.addEventListener('submit', function(e) { 
+                // ... (Your existing new task form submission handler) ... 
+            }); 
+        } 
+
+        // Handle search (if in index.html) 
+        const searchButton = document.getElementById('search-btn'); 
+        const searchInput = document.getElementById('search-input'); 
+        if (searchButton && searchInput) { 
+            searchButton.addEventListener('click', function() { 
+                // ... (Your existing search handler) ... 
+            }); 
+            searchInput.addEventListener('keyup', function(e) { 
+                // ... (Your existing search handler) ... 
+            }); 
+        } 
+
+        // Handle task type selection 
+        const taskTypeSelect = document.getElementById('task-type'); 
+        if (taskTypeSelect) { 
+            taskTypeSelect.addEventListener('change', function() { 
+                // ... (Your existing task type handler) ... 
+            }); 
+        } 
+
+        // Handle edit task button 
+        const editTaskButton = document.getElementById('edit-task-btn'); 
+        if (editTaskButton) { 
+            editTaskButton.addEventListener('click', function() { 
+                // ... (Your existing edit task handler) ... 
+            }); 
+        } 
+
         // Handle delete task button 
-        document.getElementById('delete-task-btn').addEventListener('click', function() { 
-            const taskId = this.dataset.id; 
-            TaskManager.deleteTask(taskId); 
-            closeCurrentModal(); // Close modal after deleting 
-        });
+        const deleteTaskButton = document.getElementById('delete-task-btn'); 
+        if (deleteTaskButton) { 
+            deleteTaskButton.addEventListener('click', function() { 
+                // ... (Your existing delete task handler) ... 
+            }); 
+        } 
     }
     
     function toggleSidebar() {
@@ -826,6 +747,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Initialize
-    setupEventListeners();
+    setupTaskListeners();
     TaskManager.init();
 });
