@@ -297,10 +297,9 @@ document.addEventListener('DOMContentLoaded', function() {
             let currentMonth = today.getMonth(); 
             let currentYear = today.getFullYear(); 
         
-            // Get month and year from URL parameters if available 
             const urlParams = new URLSearchParams(window.location.search); 
             if (urlParams.has('month')) { 
-                currentMonth = parseInt(urlParams.get('month')) - 1; // Adjust to 0-indexed month 
+                currentMonth = parseInt(urlParams.get('month')) - 1; 
             } 
             if (urlParams.has('year')) { 
                 currentYear = parseInt(urlParams.get('year')); 
@@ -311,6 +310,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create calendar header 
             const headerEl = document.createElement('div'); 
             headerEl.classList.add('calendar-header'); 
+            const headerTitle = document.createElement('h2'); 
+            headerTitle.textContent = 'Calendar'; 
+            headerEl.appendChild(headerTitle); 
         
             const navEl = document.createElement('div'); 
             navEl.classList.add('calendar-nav'); 
@@ -329,10 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
             navEl.appendChild(prevBtn); 
             navEl.appendChild(nextBtn); 
-        
             headerEl.appendChild(monthYearEl); 
-            headerEl.appendChild(navEl); 
-        
             calendarEl.appendChild(headerEl); 
         
             // Create weekday headers 
@@ -346,8 +345,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }); 
             calendarEl.appendChild(weekdaysEl); 
         
-            const firstDay = (new Date(currentYear, currentMonth, 1)).getDay(); 
-            const lastDay = (new Date(currentYear, currentMonth + 1, 0)).getDate(); 
+            const firstDay = (new Date(currentYear, currentMonth)).getDay(); 
+            const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate(); 
         
             const tasksByDate = {}; 
             this.tasks.filter(task => task.type === 'categorized').forEach(task => { 
@@ -362,38 +361,41 @@ document.addEventListener('DOMContentLoaded', function() {
             calendarGrid.classList.add('calendar-grid'); 
         
             let dayCounter = 1; 
-            // Add days to the grid, handling rows correctly 
-            for (let i = 0; i < 6; i++) { // Maximum 6 weeks 
-                const row = document.createElement('div'); 
-                row.classList.add('calendar-row'); 
-                for (let j = 0; j < 7; j++) { 
-                    const dayEl = document.createElement('div'); 
-                    dayEl.classList.add('calendar-day'); 
+            let currentRow = document.createElement('div'); 
+            currentRow.classList.add('calendar-row'); 
+            calendarGrid.appendChild(currentRow); 
         
-                    if (i === 0 && j < firstDay) { 
-                        dayEl.classList.add('empty'); 
-                    } else if (dayCounter <= lastDay) { 
-                        const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${dayCounter.toString().padStart(2, '0')}`; 
-                        const date = new Date(dateStr); 
-                        const dayOfWeek = date.toLocaleDateString(undefined, { weekday: 'short' }); // Get short weekday name 
+            for (let i = 0; i < 42; i++) { // Maximum 42 days (6 weeks) 
+                const dayEl = document.createElement('div'); 
+                dayEl.classList.add('calendar-day'); 
         
-                        dayEl.textContent = dayCounter; 
-                        dayEl.dataset.dayOfWeek = dayOfWeek; // Store day of week for later use (optional) 
+                if (i < firstDay || dayCounter > lastDay) { 
+                    dayEl.classList.add('empty'); 
+                } else { 
+                    const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${dayCounter.toString().padStart(2, '0')}`; 
+                    const date = new Date(dateStr); 
+                    const dayOfWeek = date.toLocaleDateString(undefined, { weekday: 'short' }); 
         
-                        if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
-                            dayEl.classList.add('has-tasks'); 
-                            dayEl.addEventListener('click', () => this.showTasksForDay(dateStr)); 
-                        } 
-                        if (new Date().getDate() === dayCounter && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear) { 
-                            dayEl.classList.add('today'); 
-                        } 
-                        dayCounter++; 
-                    } else { 
-                        dayEl.classList.add('empty'); 
+                    dayEl.textContent = dayCounter; 
+                    dayEl.dataset.dayOfWeek = dayOfWeek; 
+        
+                    if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
+                        dayEl.classList.add('has-tasks'); 
+                        dayEl.addEventListener('click', () => this.showTasksForDay(dateStr)); 
                     } 
-                    row.appendChild(dayEl); 
+                    if (new Date().getDate() === dayCounter && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear) { 
+                        dayEl.classList.add('today'); 
+                    } 
+                    dayCounter++; 
                 } 
-                calendarGrid.appendChild(row); 
+                currentRow.appendChild(dayEl); 
+        
+                // Move to the next row if it's the end of a week 
+                if ((i + 1) % 7 === 0) { 
+                    currentRow = document.createElement('div'); 
+                    currentRow.classList.add('calendar-row'); 
+                    calendarGrid.appendChild(currentRow); 
+                } 
             } 
         
             calendarEl.appendChild(calendarGrid); 
