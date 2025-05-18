@@ -1,5 +1,73 @@
-/* ... (Existing styles from styles.css) ... */ 
+/* General styles (inherit from styles.css if needed) */ 
 
+* { 
+
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+} 
+
+:root { 
+
+--primary-color: #4a6fa5; /* Example primary color */ 
+
+--primary-light: #6989bb; 
+
+--primary-dark: #2d557d; 
+
+--secondary-color: #f8b400; /* Example secondary color */ 
+
+--text-color: #333; 
+
+--text-light: #666; 
+
+--bg-color: #f5f5f5; 
+
+--card-bg: #fff; 
+
+--cancel: #ddd; 
+
+--danger: #f44336; 
+
+--border-radius: 8px; 
+
+--box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
+
+--transition: all 0.3s ease; 
+} 
+
+body { 
+    background-color: var(--bg-color); 
+    color: var(--text-color); 
+} 
+
+body.dark-theme { 
+
+--primary-color: #0f284d; 
+
+--primary-light: #6989bb; 
+
+--primary-dark: #3a6ca8; 
+
+--secondary-color: #8c6e14; 
+
+--text-color: #ffffff; 
+
+--text-light: #aaa; 
+
+--bg-color: #1f1f1f; 
+
+--cancel: #1f1f1f; 
+
+--card-bg: #2d2d2d; 
+
+--danger: #730d06; 
+
+--box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); 
+} 
+
+/* Notes Container Styles */ 
 .notes-container { 
     display: flex; 
     height: calc(100vh - 60px - 20px - 20px); /* Adjust for topbar and padding */ 
@@ -25,6 +93,7 @@
     cursor: pointer; 
     transition: var(--transition); 
     border-left: 4px solid transparent; 
+    position: relative; /* For color indicator */ 
 } 
 
 .note-item.active { 
@@ -39,6 +108,16 @@
 .note-item-date { 
     font-size: 0.8rem; 
     color: var(--text-light); 
+} 
+
+.note-color-indicator { /* Added for color indicator */ 
+    position: absolute; 
+    top: 50%; 
+    left: 5px; 
+    transform: translateY(-50%); 
+    width: 8px; 
+    height: 8px; 
+    border-radius: 50%; 
 } 
 
 .notes-editor-container { 
@@ -69,10 +148,14 @@
 
 #editor-container { 
     height: calc(100% - 80px); /* Adjust for header height */ 
+    border: 1px solid #ddd; /* Add a border for better visual separation */ 
+    border-radius: var(--border-radius); /* Match other border-radii */ 
+    box-shadow: var(--box-shadow); /* Add a subtle shadow */ 
 } 
 
 .ql-editor { 
     height: 100%; 
+    padding: 10px; /* Add some padding inside the editor */ 
 } 
 
 .ql-container { 
@@ -88,20 +171,46 @@
 .emoji-mart { 
     position: absolute; 
     z-index: 1000; 
-}
+} 
 
-#new-task-btn {
-    padding: 8px 15px;
-    background-color: var(--secondary-color);
-    color: var(--text-color);
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    margin-right: 10px;
-}
+/* Button Styles */ 
+button { 
+    padding: 8px 15px; 
+    border: none; 
+    border-radius: var(--border-radius); 
+    cursor: pointer; 
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */ 
+} 
 
-#new-task-btn i {
-    margin-right: 5px;
+button:hover { 
+    background-color: var(--primary-light); /* Change background on hover */ 
+} 
+
+button.danger { 
+    background-color: var(--danger); 
+    color: white; 
+} 
+
+button.danger:hover { 
+    background-color: darken(var(--danger), 10%); /* Darken on hover */ 
+} 
+
+/* Input Styles */ 
+input[type="text"], 
+input[type="color"] { 
+    padding: 8px; 
+    border: 1px solid #ccc; 
+    border-radius: var(--border-radius); 
+    width: 100%; /* Make inputs full width */ 
+    box-sizing: border-box; /* Include padding and border in width */ 
+} 
+
+/* Responsive Styles (adjust as needed) */ 
+@media (max-width: 768px) { 
+    .notes-list-container { 
+        width: 250px; /* Reduce width on smaller screens */ 
+    } 
+    .notes-editor-container { 
+        width: calc(100% - 250px); /* Adjust width based on notes list */ 
+    } 
 }
