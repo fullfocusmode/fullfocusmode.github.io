@@ -1,359 +1,335 @@
-// Notes management script for FullFocus 
-    // Initialize Notes Manager 
-    const NotesManager = { 
+document.addEventListener('DOMContentLoaded', function() { 
+    // Data management for notes 
+
+    const NoteManager = { 
         init: function() { 
             this.loadNotes(); 
-            this.setupEditor(); 
-            this.currentNoteId = null; 
-            this.renderNotesCount(); 
-    }, 
-
-    notes: [], 
-
-    loadNotes: function() { 
-        const storedNotes = localStorage.getItem('fullfocus_notes'); 
-        this.notes = storedNotes ? JSON.parse(storedNotes) : []; 
-        this.renderNotesList(); 
-    }, 
-
-    saveNotes: function() { 
-        localStorage.setItem('fullfocus_notes', JSON.stringify(this.notes)); 
-        this.renderNotesList(); 
-        this.renderNotesCount(); 
-    },  
-
-    setupEditor: function() { 
-        const toolbarOptions = [ 
-            [{ 'header': [1, 2, 3, 4, 5, 6, false] }], 
-            ['bold', 'italic', 'underline', 'strike'], 
-            [{ 'color': [] }, { 'background': [] }], 
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }], 
-            ['link', 'image', 'code', 'clean'], 
-            ['emoji'], 
-            [{ 'font': [] }], 
-            [{ 'size': ['small', false, 'large', 'huge'] }], 
-            [{ 'align': [] }], 
-            ['clean'], 
-            ['blockquote', 'code-block'], 
-            ['script', 'direction'], 
-            ['formula'], 
-            ['video'], 
-            ['hr'] // Horizontal rule 
-        ]; 
-
-        this.quill = new Quill('#editor-container', { 
-            modules: { 
-                toolbar: toolbarOptions, 
-                emoji: true, 
-                formula: true, // Enable the formula module 
-            }, 
-            placeholder: 'Start writing here...', 
-            theme: 'snow' 
-        }); 
-
-        this.quill.on('text-change', () => { 
-            this.updateWordCount(); 
-            this.renderMath(); // Render math formulas after changes 
-        }); 
-
-        this.quill.on('editor-change', () => { // Use 'editor-change' for better handling 
-            this.updateWordCount(); 
-            this.renderMath(); 
-        });
-
-        this.addEmojiPicker(); 
-        this.disableEditor(); 
-
-        // Handle video insertion 
-        this.quill.getModule('toolbar').addHandler('video', () => { 
-            const videoUrl = prompt("Enter the video URL:"); 
-            if (videoUrl) { 
-                this.quill.insertEmbed(this.quill.getSelection().index, 'video', videoUrl); 
-            } 
-        }); 
-
-        // Handle horizontal rule insertion 
-        this.quill.getModule('toolbar').addHandler('hr', () => { 
-            this.quill.insertHTML('<hr>'); 
-        }); 
-
-        // Render math formulas on initial load 
-        this.renderMath(); 
-    }, 
-
-    renderMath: function() { 
-        renderMathInElement(document.querySelector('.ql-editor')); 
-    }, 
-
-    addEmojiPicker: function() { 
-        const emojiPicker = new EmojiMart({ 
-            appendTo: document.body, 
-            onSelect: (emoji) => { 
-                this.quill.insertText(this.quill.getSelection().index, emoji.native); 
-            } 
-        }); 
-
-        this.quill.getModule('toolbar').addHandler('emoji', () => { 
-            emojiPicker.toggle(); 
-        }); 
-    }, 
-
-    updateWordCount: function() { 
-        const wordCount = this.quill.getText().trim().split(/\s+/).length; 
-        const title = document.getElementById('note-title').value; 
-        const noteItem = document.querySelector(`.note-item[data-id="${this.currentNoteId}"]`); 
-        if (noteItem) { 
-            noteItem.querySelector('.note-item-title').textContent = `${title} (${wordCount} words)`; 
-        } 
-    }, 
-
-    enableEditor: function() { 
-        this.quill.enable(); 
-        document.getElementById('note-title').disabled = false; 
-        document.getElementById('note-color').disabled = false; 
-        document.getElementById('save-note-btn').disabled = false; 
-        document.getElementById('delete-note-btn').disabled = false; 
-    }, 
-
-    disableEditor: function() { 
-        this.quill.enable(false); 
-        document.getElementById('note-title').disabled = true; 
-        document.getElementById('note-color').disabled = true; 
-        document.getElementById('save-note-btn').disabled = true; 
-        document.getElementById('delete-note-btn').disabled = true; 
-
-        // Clear editor content 
-        this.quill.setContents([{ insert: '' }]); // Initialize with empty content 
-        document.getElementById('note-title').value = ''; 
-        this.currentNoteId = null; 
-    }, 
-
-    createNewNote: function() { 
-        const newNote = { 
-            id: Date.now().toString(36) + Math.random().toString(36).substr(2), 
-            title: 'Untitled Note', 
-            content: JSON.stringify([{ insert: '' }]), // Initialize with empty content 
-            created: new Date().toISOString(), 
-            updated: new Date().toISOString(), 
-            color: '#f06e6e' // Default color 
-        }; 
-
-        this.notes.unshift(newNote); 
-        this.saveNotes(); 
-        this.loadNote(newNote.id); 
-    }, 
-
-    loadNote: function(noteId) { 
-        const note = this.notes.find(n => n.id === noteId); 
-        if (!note) return; 
-
-        this.currentNoteId = noteId; 
-        document.getElementById('note-title').value = note.title; 
-        document.getElementById('note-color').value = note.color; 
-
-        // Load content into editor 
-        try { 
-            const content = note.content ? JSON.parse(note.content) : [{ insert: '' }]; 
-            this.quill.setContents(content); 
-        } catch (e) { 
-            console.error('Error parsing note content:', e); 
-            this.quill.setText(note.content || ''); 
-        } 
-
-        this.enableEditor(); 
-        this.highlightActiveNote(noteId); 
-    }, 
-
-    saveCurrentNote: function() { 
-        if (!this.currentNoteId) { 
-            this.createNewNote(); 
-            return; 
-        } 
-
-        const index = this.notes.findIndex(n => n.id === this.currentNoteId); 
-        if (index === -1) return false; 
-
-        // Update note data 
-        this.notes[index].title = document.getElementById('note-title').value || 'Untitled Note'; 
-        this.notes[index].content = JSON.stringify(this.quill.getContents()); 
-        this.notes[index].updated = new Date().toISOString(); 
-        this.notes[index].color = document.getElementById('note-color').value; 
-
-        this.saveNotes(); 
-        this.updateWordCount(); 
-        this.highlightActiveNote(this.currentNoteId); 
-        return true; 
-    }, 
-
-    deleteNote: function(noteId) { 
-        if (!noteId) return; 
-
-        if (confirm('Are you sure you want to delete this note?')) { 
-            this.notes = this.notes.filter(n => n.id !== noteId); 
+            this.renderNotes(); 
+            this.setupEventListeners(); 
+        }, 
+        notes: [], 
+        loadNotes: function() { 
+            const storedNotes = localStorage.getItem('fullfocus_notes'); 
+            this.notes = storedNotes ? JSON.parse(storedNotes) : []; 
+        }, 
+        saveNotes: function() { 
+            localStorage.setItem('fullfocus_notes', JSON.stringify(this.notes)); 
+            this.renderNotes(); 
+        }, 
+        addNote: function(note) { 
+            note.id = Date.now().toString(36) + Math.random().toString(36).substr(2); 
+            this.notes.unshift(note); // Add to the beginning 
             this.saveNotes(); 
+        }, 
+        updateNote: function(noteId, updates) { 
+            const index = this.notes.findIndex(note => note.id === noteId); 
+            if (index !== -1) { 
+                this.notes[index] = { ...this.notes[index], ...updates }; 
+                this.saveNotes(); 
+            } 
+        }, 
+        deleteNote: function(noteId) { 
+            this.notes = this.notes.filter(note => note.id !== noteId); 
+            this.saveNotes(); 
+        }, 
+        renderNotes: function() { 
+            const notesGrid = document.getElementById('notes-grid'); 
+            notesGrid.innerHTML = ''; 
 
-            if (this.currentNoteId === noteId) { 
-                this.disableEditor(); 
-                // Load the first note if available 
-                if (this.notes.length > 0) { 
-                    this.loadNote(this.notes[0].id); 
+            this.notes.forEach(note => { 
+                const noteItem = this.createNoteElement(note); 
+                notesGrid.appendChild(noteItem); 
+            }); 
+        }, 
+        createNoteElement: function(note) { 
+            const noteItem = document.createElement('div'); 
+            noteItem.classList.add('note-item', note.color.replace('#', '')); // Add color class 
+            noteItem.dataset.id = note.id; 
+            noteItem.innerHTML = ` 
+                <div class="note-title">${note.title} <span class="note-word-count">${this.getWordCount(note.content)}</span></div> 
+                <div class="note-content">${note.content}</div> 
+            `; 
+
+            noteItem.addEventListener('click', () => { 
+                this.showNoteDetails(note.id); 
+            }); 
+            return noteItem; 
+        }, 
+        getWordCount: function(text) { 
+            return text.trim().split(/\s+/).length; 
+        }, 
+        showNoteDetails: function(noteId) { 
+            // Find the note and move it to the top 
+            const index = this.notes.findIndex(note => note.id === noteId); 
+            if (index !== -1) { 
+                const note = this.notes.splice(index, 1)[0]; 
+                this.notes.unshift(note); 
+                this.saveNotes(); 
+            } 
+        }, 
+        setupEventListeners: function() { 
+            document.getElementById('new-note-btn').addEventListener('click', () => openModal('new-note-modal')); 
+            document.getElementById('new-note-form').addEventListener('submit', (e) => { 
+                e.preventDefault(); 
+                const noteData = { 
+                    title: document.getElementById('note-title').value, 
+                    content: document.getElementById('note-content').value, 
+                    color: document.getElementById('note-color').value 
+                }; 
+                this.addNote(noteData); 
+                closeCurrentModal(); 
+                document.getElementById('new-note-form').reset(); 
+            }); 
+        } 
+    }; 
+
+    // UI event handlers (shared between tasks and notes) 
+    function setupEventListeners() { 
+        // Sidebar toggle 
+        document.getElementById('toggle-sidebar').addEventListener('click', toggleSidebar); 
+        document.getElementById('close-sidebar').addEventListener('click', closeSidebar); 
+
+        // Settings button 
+        document.getElementById('settings-btn').addEventListener('click', () => openModal('settings-modal')); 
+
+        // Close modal buttons 
+        document.querySelectorAll('.close, .cancel-btn').forEach(button => { 
+            button.addEventListener('click', closeCurrentModal); 
+        }); 
+
+        // Close modals when clicking outside 
+        window.addEventListener('click', event => { 
+            if (event.target.classList.contains('modal')) { 
+                closeCurrentModal(); 
+            } 
+        }); 
+
+        // Handle theme selector 
+        document.getElementById('theme-selector').addEventListener('change', function() { 
+            TaskManager.settings.theme = this.value; 
+            TaskManager.saveSettings(); 
+            TaskManager.applySettings(); 
+        }); 
+
+        // Handle data export 
+        document.getElementById('export-data').addEventListener('click', function() { 
+            const data = { 
+                tasks: TaskManager.tasks, 
+                embeds: TaskManager.embeds, 
+                quickLinks: TaskManager.quickLinks, 
+                settings: TaskManager.settings, 
+                notes: NoteManager.notes 
+            }; 
+            const dataStr = JSON.stringify(data); 
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr); 
+            const exportLink = document.createElement('a'); 
+            exportLink.setAttribute('href', dataUri); 
+            exportLink.setAttribute('download', 'fullfocus_backup.json'); 
+            document.body.appendChild(exportLink); 
+            exportLink.click(); 
+            document.body.removeChild(exportLink); 
+        }); 
+
+        // Handle data import 
+        document.getElementById('import-data').addEventListener('click', function() { 
+            const input = document.createElement('input'); 
+            input.type = 'file'; 
+            input.accept = '.json'; 
+            input.onchange = e => { 
+                const file = e.target.files[0]; 
+                if (!file) return; 
+                const reader = new FileReader(); 
+                reader.onload = e => { 
+                    const result = TaskManager.importData(e.target.result); 
+                    if (result) { 
+                        alert('Data imported successfully!'); 
+                        closeCurrentModal(); 
+                    } else { 
+                        alert('Failed to import data. Please check the file format.'); 
+                    } 
+                }; 
+                reader.readAsText(file); 
+            }; 
+            input.click(); 
+        }); 
+
+        // Handle clear all data 
+        document.getElementById('clear-data').addEventListener('click', function() { 
+            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) { 
+                localStorage.clear(); 
+                TaskManager.tasks = []; 
+                TaskManager.embeds = []; 
+                TaskManager.quickLinks = []; 
+                TaskManager.settings = { theme: 'light' }; 
+                NoteManager.notes = []; 
+                TaskManager.renderTasks(); 
+                TaskManager.renderEmbeds(); 
+                TaskManager.renderQuickLinks(); 
+                TaskManager.applySettings(); 
+                TaskManager.renderCalendar(); 
+                NoteManager.renderNotes(); 
+            } 
+        }); 
+
+        // Add embed button 
+        document.getElementById('add-embed-btn').addEventListener('click', () => openModal('embed-modal')); 
+
+        // Add quick link button 
+        document.getElementById('add-quicklink-btn').addEventListener('click', () => openModal('quicklink-modal')); 
+
+        // Handle new task form submission 
+        document.getElementById('new-task-form').addEventListener('submit', function(e) { 
+            e.preventDefault(); 
+            const taskData = { 
+                title: document.getElementById('task-title').value, 
+                description: document.getElementById('task-description').value, 
+                type: document.getElementById('task-type').value, 
+                priority: document.getElementById('task-priority').value 
+            }; 
+            if (taskData.type === 'categorized') { 
+                taskData.date = document.getElementById('task-date').value; 
+            } 
+            TaskManager.addTask(taskData); 
+            closeCurrentModal(); 
+            this.reset(); 
+            document.querySelector('.date-group').style.display = 'none'; 
+        }); 
+
+        // Handle embed form submission 
+        document.getElementById('embed-form').addEventListener('submit', function(e) { 
+            e.preventDefault(); 
+            const embedData = { 
+                title: document.getElementById('embed-title').value, 
+                url: document.getElementById('embed-url').value 
+            }; 
+            TaskManager.addEmbed(embedData); 
+            closeCurrentModal(); 
+            this.reset(); 
+        }); 
+
+        // Handle quick link form submission 
+        document.getElementById('quicklink-form').addEventListener('submit', function(e) { 
+            e.preventDefault(); 
+            const quickLinkData = { 
+                title: document.getElementById('quicklink-title').value, 
+                url: document.getElementById('quicklink-url').value 
+            }; 
+            TaskManager.addQuickLink(quickLinkData); 
+            closeCurrentModal(); 
+            this.reset(); 
+        }); 
+
+        // Handle search 
+        document.getElementById('search-btn').addEventListener('click', function() { 
+            const query = document.getElementById('search-input').value.trim(); 
+            if (query) { 
+                TaskManager.searchTasks(query); 
+            } else { 
+                TaskManager.renderTasks(); 
+            } 
+        }); 
+
+        document.getElementById('search-input').addEventListener('keyup', function(e) { 
+            if (e.key === 'Enter') { 
+                const query = this.value.trim(); 
+                if (query) { 
+                    TaskManager.searchTasks(query); 
+                } else { 
+                    TaskManager.renderTasks(); 
                 } 
             } 
-        } 
-    }, 
-
-    renderNotesList: function() { 
-        const notesListEl = document.getElementById('notes-list'); 
-        notesListEl.innerHTML = ''; 
-
-        if (this.notes.length === 0) { 
-            notesListEl.innerHTML = '<div class="empty-message">No notes yet</div>'; 
-            return; 
-        } 
-
-        // Sort notes by updated date (newest first) 
-        const sortedNotes = [...this.notes].sort((a, b) => 
-            new Date(b.updated) - new Date(a.updated) 
-        ); 
-
-        sortedNotes.forEach(note => { 
-            const noteEl = document.createElement('div'); 
-            noteEl.classList.add('note-item'); 
-            noteEl.dataset.id = note.id; 
-
-            if (this.currentNoteId === note.id) { 
-                noteEl.classList.add('active'); 
-            } 
-
-            const titleEl = document.createElement('div'); 
-            titleEl.classList.add('note-item-title'); 
-
-            const wordCount = (note.content) ? JSON.parse(note.content).ops.reduce((sum, op) => sum + (op.insert ? op.insert.length : 0), 0) : 0; 
-            titleEl.textContent = `${note.title} (${wordCount} words)`; 
-
-            // Add color indicator 
-            const colorIndicator = document.createElement('span'); 
-            colorIndicator.classList.add('note-color-indicator'); 
-            colorIndicator.style.backgroundColor = note.color || '#f06e6e'; // Default color 
-            noteEl.appendChild(colorIndicator); 
-            noteEl.appendChild(titleEl); 
-
-            // Add event listener to load note 
-            noteEl.addEventListener('click', () => this.loadNote(note.id)); 
-
-            notesListEl.appendChild(noteEl); 
         }); 
-    }, 
 
-    renderNotesCount: function() { 
-        document.getElementById('notes-count').textContent = 
-            this.notes.length + (this.notes.length === 1 ? ' note' : ' notes'); 
-    }, 
-
-    highlightActiveNote: function(noteId) { 
-        document.querySelectorAll('.note-item').forEach(item => { 
-            if (item.dataset.id === noteId) { 
-                item.classList.add('active'); 
+        // Handle task type selection 
+        document.getElementById('task-type').addEventListener('change', function() { 
+            const dateGroup = document.querySelector('.date-group'); 
+            if (this.value === 'categorized') { 
+                dateGroup.style.display = 'block'; 
             } else { 
-                item.classList.remove('active'); 
+                dateGroup.style.display = 'none'; 
             } 
         }); 
-    }, 
 
-    searchNotes: function(query) { 
-        query = query.toLowerCase(); 
-
-        const notesListEl = document.getElementById('notes-list'); 
-        notesListEl.innerHTML = ''; 
-
-        const filteredNotes = this.notes.filter(note => 
-            note.title.toLowerCase().includes(query) || 
-            (typeof note.content === 'string' && note.content.toLowerCase().includes(query)) 
-        ); 
-
-        if (filteredNotes.length === 0) { 
-            notesListEl.innerHTML = '<div class="empty-message">No matching notes</div>'; 
-            return; 
-        } 
-
-        filteredNotes.forEach(note => { 
-            const noteEl = document.createElement('div'); 
-            noteEl.classList.add('note-item'); 
-            noteEl.dataset.id = note.id; 
-
-            if (this.currentNoteId === note.id) { 
-                noteEl.classList.add('active'); 
+        // Handle edit task button 
+        document.getElementById('edit-task-btn').addEventListener('click', function() { 
+            const taskId = this.dataset.id; 
+            const task = TaskManager.tasks.find(t => t.id === taskId); 
+            if (task) { 
+                document.getElementById('task-title').value = task.title; 
+                document.getElementById('task-description').value = task.description || ''; 
+                document.getElementById('task-type').value = task.type; 
+                document.getElementById('task-priority').value = task.priority; 
+                const dateGroup = document.querySelector('.date-group'); 
+                if (task.type === 'categorized') { 
+                    dateGroup.style.display = 'block'; 
+                    document.getElementById('task-date').value = task.date || ''; 
+                } else { 
+                    dateGroup.style.display = 'none'; 
+                } 
+                const form = document.getElementById('new-task-form'); 
+                const originalSubmitHandler = form.onsubmit; 
+                form.onsubmit = function(e) { 
+                    e.preventDefault(); 
+                    const updates = { 
+                        title: document.getElementById('task-title').value, 
+                        description: document.getElementById('task-description').value, 
+                        type: document.getElementById('task-type').value, 
+                        priority: document.getElementById('task-priority').value 
+                    }; 
+                    if (updates.type === 'categorized') { 
+                        updates.date = document.getElementById('task-date').value; 
+                    } else { 
+                        updates.date = null; 
+                    } 
+                    TaskManager.updateTask(taskId, updates); 
+                    closeCurrentModal(); 
+                    form.reset(); 
+                    form.onsubmit = originalSubmitHandler; 
+                    document.querySelector('.date-group').style.display = 'none'; 
+                }; 
+                closeCurrentModal(); 
+                openModal('new-task-modal'); 
             } 
-
-            const titleEl = document.createElement('div'); 
-            titleEl.classList.add('note-item-title'); 
-            titleEl.textContent = note.title; 
-
-            const dateEl = document.createElement('div'); 
-            dateEl.classList.add('note-item-date'); 
-            dateEl.textContent = new Date(note.updated).toLocaleDateString(); 
-
-            noteEl.appendChild(titleEl); 
-            noteEl.appendChild(dateEl); 
-
-            noteEl.addEventListener('click', () => this.loadNote(note.id)); 
-            notesListEl.appendChild(noteEl); 
         }); 
-    }
-}; 
 
-// UI event handlers for notes 
-function setupNotesEventListeners() { 
-    // New note button 
-    document.getElementById('new-note-btn').addEventListener('click', () => { 
-        NotesManager.createNewNote(); 
-    }); 
+        // Handle delete task button 
+        document.getElementById('delete-task-btn').addEventListener('click', function() { 
+            const taskId = this.dataset.id; 
+            TaskManager.deleteTask(taskId); 
+            closeCurrentModal(); 
+        }); 
+    } 
 
-    // Save note button 
-    document.getElementById('save-note-btn').addEventListener('click', () => { 
-        NotesManager.saveCurrentNote(); 
-    }); 
+    function toggleSidebar() { 
+        const sidebar = document.getElementById('sidebar'); 
+        const mainContent = document.querySelector('.main-content'); 
+        sidebar.classList.toggle('collapsed'); 
+        mainContent.classList.toggle('expanded'); 
+    } 
 
-    // Delete note button 
-    document.getElementById('delete-note-btn').addEventListener('click', () => { 
-        NotesManager.deleteNote(NotesManager.currentNoteId); 
-    }); 
+    function closeSidebar() { 
+        const sidebar = document.getElementById('sidebar'); 
+        const mainContent = document.querySelector('.main-content'); 
+        sidebar.classList.add('collapsed'); 
+        mainContent.classList.add('expanded'); 
+    } 
 
-    // Auto-save on title change 
-    document.getElementById('note-title').addEventListener('blur', () => { 
-        NotesManager.saveCurrentNote(); 
-    }); 
-
-    // Search notes 
-    document.getElementById('notes-search-btn').addEventListener('click', () => { 
-        const query = document.getElementById('notes-search-input').value.trim(); 
-        if (query) { 
-            NotesManager.searchNotes(query); 
-        } else { 
-            NotesManager.renderNotesList(); 
+    function openModal(modalId) { 
+        closeCurrentModal(); 
+        const modal = document.getElementById(modalId); 
+        if (modal) { 
+            modal.style.display = 'block'; 
         } 
-    }); 
+    } 
 
-    document.getElementById('notes-search-input').addEventListener('keyup', function(e) { 
-        if (e.key === 'Enter') { 
-            const query = this.value.trim(); 
-            if (query) { 
-                NotesManager.searchNotes(query); 
-            } else { 
-                NotesManager.renderNotesList(); 
-            } 
-        } 
-    }); 
+    function closeCurrentModal() { 
+        const modals = document.querySelectorAll('.modal'); 
+        modals.forEach(modal => { 
+            modal.style.display = 'none'; 
+        }); 
+    } 
 
-    // Auto-save every 30 seconds if there's an active note 
-    setInterval(() => { 
-        if (NotesManager.currentNoteId) { 
-            NotesManager.saveCurrentNote(); 
-        } 
-    }, 30000); 
-} 
-
-document.addEventListener('DOMContentLoaded', function() { 
-    NotesManager.init(); // Initialize after DOM is ready 
-    setupNotesEventListeners(); 
+    // Initialize both TaskManager and NoteManager 
+    setupEventListeners(); 
+    NoteManager.init(); 
 });
