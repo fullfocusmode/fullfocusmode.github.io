@@ -3,15 +3,10 @@
 <head> 
     <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Notes</title> 
+    <title>FullFocus Notes</title> 
     <link rel="stylesheet" href="notes.css"> 
-    <link rel="stylesheet" href="styles.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
-    <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css"> 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/emoji-mart/3.0.1/css/emoji-mart.min.css"> 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" integrity="sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP" crossorigin="anonymous"> 
-
-</head> 
+    <link rel="stylesheet" href="styles.css"> </head> 
 <body> 
     <div class="sidebar" id="sidebar"> 
         <!-- Sidebar content (same as index.html) --> 
@@ -27,12 +22,16 @@
         </div> 
         <div class="sidebar-section"> 
             <h3>WebViewer</h3> 
-            <div id="embeds-list"></div> 
+            <div id="embeds-list"> 
+                <!-- Embeds will be loaded here --> 
+            </div> 
             <button id="add-embed-btn"><i class="fas fa-plus"></i> Add Embed</button> 
         </div> 
         <div class="sidebar-section"> 
             <h3>Quick Links</h3> 
-            <div id="quicklinks-list"></div> 
+            <div id="quicklinks-list"> 
+                <!-- Quick links will be loaded here --> 
+            </div> 
             <button id="add-quicklink-btn"><i class="fas fa-plus"></i> Add Quick Link</button> 
         </div> 
     </div> 
@@ -40,37 +39,16 @@
     <div class="main-content"> 
         <div class="topbar"> 
             <button id="toggle-sidebar"><i class="fas fa-bars"></i></button> 
-            <div class="search-container"> 
-                <input type="text" id="search-input" placeholder="Search notes..."> 
-                <button id="search-btn"><i class="fas fa-search"></i></button> 
-            </div> 
-            <div class="topbar-actions"> 
-                <button id="new-task-btn"><i class="fas fa-plus"></i> New Note</button> 
-                <button id="settings-btn"><i class="fas fa-cog"></i></button> 
-            </div> 
+            <button id="new-note-btn"><i class="fas fa-plus"></i> New Note</button> 
+            <button id="settings-btn"><i class="fas fa-cog"></i></button> 
         </div> 
 
         <div class="notes-container"> 
-            <div class="notes-list-container"> 
-                <div id="notes-list"></div> 
-            </div> 
-            <div class="notes-editor-container"> 
-                <div class="notes-header"> 
-                    <input type="text" id="note-title" placeholder="Note title..."> 
-                    <div class="note-colors"> 
-                        <input type="color" id="note-color" value="#f06e6e"> 
-                    </div> 
-                    <div class="notes-actions"> 
-                        <button type="submit"><i class="fas fa-save"></i> Save</button> 
-                        <button id="delete-task-btn" class="danger"><i class="fas fa-trash"></i> Delete</button> 
-                    </div> 
-                </div> 
-                <div id="editor-container"></div> 
-            </div> 
+            <div id="notes-grid"></div> 
         </div> 
     </div> 
 
-    <!-- Modals (same as index.html) --> 
+    <!-- Modals (same as index.html, except add new-note modal) --> 
     <div id="settings-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -141,13 +119,41 @@
                 <iframe id="embed-iframe" src="" frameborder="0"></iframe>
             </div>
         </div>
+    </div>
+    <div id="new-note-modal" class="modal"> 
+        <div class="modal-content"> 
+            <span class="close">&times;</span> 
+            <h2>Create New Note</h2> 
+            <form id="new-note-form"> 
+                <div class="form-group"> 
+                    <label for="note-title">Title:</label> 
+                    <input type="text" id="note-title" required> 
+                </div> 
+                <div class="form-group"> 
+                    <label for="note-color">Background Color:</label> 
+                    <select id="note-color"> 
+                        <option value="#f06e6e">Red</option> 
+                        <option value="#f0a46e">Orange</option> 
+                        <option value="#f0e96e">Yellow</option> 
+                        <option value="#7bf06e">Green</option> 
+                        <option value="#6ed4f0">Blue</option> 
+                        <option value="#6e7df0">Violet</option> 
+                        <option value="#da6ef0">Purple</option> 
+                        <option value="#f06ec7">Pink</option> 
+                    </select> 
+                </div> 
+                <div class="form-group"> 
+                    <label for="note-content">Content:</label> 
+                    <textarea id="note-content"></textarea> 
+                </div> 
+                <div class="form-buttons"> 
+                    <button type="submit">Save</button> 
+                    <button type="button" class="cancel-btn">Cancel</button> 
+                </div> 
+            </form> 
+        </div> 
     </div> 
 
-    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script> 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/emoji-mart/3.0.1/js/emoji-mart.min.js"></script> 
-    <script src="script.js"></script> 
     <script src="notes.js"></script> 
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js" integrity="sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6" crossorigin="anonymous"></script> 
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"></script> 
 </body> 
 </html>
