@@ -314,27 +314,24 @@ document.addEventListener('DOMContentLoaded', function() {
             headerTitle.textContent = 'Calendar'; 
             headerEl.appendChild(headerTitle); 
         
-            const navEl = document.createElement('div'); 
-            navEl.classList.add('calendar-nav'); 
-        
+            const monthYearNav = document.createElement('div'); 
+            monthYearNav.classList.add('month-year-nav'); 
+            const monthYearEl = document.createElement('span'); 
+            monthYearEl.textContent = `${this.getMonthName(currentMonth)} ${currentYear}`; 
             const prevBtn = document.createElement('button'); 
             prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>'; 
             prevBtn.addEventListener('click', () => this.changeMonth(-1)); 
-        
             const nextBtn = document.createElement('button'); 
             nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>'; 
             nextBtn.addEventListener('click', () => this.changeMonth(1)); 
         
-            const monthYearEl = document.createElement('div'); 
-            monthYearEl.classList.add('calendar-month-year'); 
-            monthYearEl.textContent = this.getMonthName(currentMonth) + ' ' + currentYear; 
-        
-            navEl.appendChild(prevBtn); 
-            navEl.appendChild(nextBtn); 
-            headerEl.appendChild(monthYearEl); 
+            monthYearNav.appendChild(prevBtn); 
+            monthYearNav.appendChild(monthYearEl); 
+            monthYearNav.appendChild(nextBtn); 
+            headerEl.appendChild(monthYearNav); 
             calendarEl.appendChild(headerEl); 
         
-            // Create weekday headers 
+            // Weekday headers 
             const weekdaysEl = document.createElement('div'); 
             weekdaysEl.classList.add('calendar-weekdays'); 
             const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; 
@@ -345,8 +342,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }); 
             calendarEl.appendChild(weekdaysEl); 
         
-            const firstDay = (new Date(currentYear, currentMonth)).getDay(); 
-            const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate(); 
+            const firstDay = (new Date(currentYear, currentMonth, 1)).getDay(); 
+            const lastDay = (new Date(currentYear, currentMonth + 1, 0)).getDate(); 
         
             const tasksByDate = {}; 
             this.tasks.filter(task => task.type === 'categorized').forEach(task => { 
@@ -357,48 +354,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 } 
             }); 
         
-            const calendarGrid = document.createElement('div'); 
-            calendarGrid.classList.add('calendar-grid'); 
-        
             let dayCounter = 1; 
-            let currentRow = document.createElement('div'); 
-            currentRow.classList.add('calendar-row'); 
-            calendarGrid.appendChild(currentRow); 
+            let dayOfWeek = firstDay; // Start with the day of the week for the 1st 
         
-            for (let i = 0; i < 42; i++) { // Maximum 42 days (6 weeks) 
-                const dayEl = document.createElement('div'); 
-                dayEl.classList.add('calendar-day'); 
+            // Create rows dynamically 
+            for (let week = 0; week < 6; week++) { // Max 6 weeks 
+                const row = document.createElement('div'); 
+                row.classList.add('calendar-row'); 
         
-                if (i < firstDay || dayCounter > lastDay) { 
-                    dayEl.classList.add('empty'); 
-                } else { 
-                    const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${dayCounter.toString().padStart(2, '0')}`; 
-                    const date = new Date(dateStr); 
-                    const dayOfWeek = date.toLocaleDateString(undefined, { weekday: 'short' }); 
+                for (let day = 0; day < 7; day++) { 
+                    const dayEl = document.createElement('div'); 
+                    dayEl.classList.add('calendar-day'); 
         
-                    dayEl.textContent = dayCounter; 
-                    dayEl.dataset.dayOfWeek = dayOfWeek; 
+                    if (day < dayOfWeek && week === 0 || dayCounter > lastDay) { 
+                        dayEl.classList.add('empty'); 
+                    } else { 
+                        const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${dayCounter.toString().padStart(2, '0')}`; 
+                        const date = new Date(dateStr); 
+                        dayEl.textContent = dayCounter; 
+                        dayEl.dataset.dayOfWeek = date.toLocaleDateString(undefined, { weekday: 'short' }); 
         
-                    if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
-                        dayEl.classList.add('has-tasks'); 
-                        dayEl.addEventListener('click', () => this.showTasksForDay(dateStr)); 
+                        if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
+                            dayEl.classList.add('has-tasks'); 
+                            dayEl.addEventListener('click', () => this.showTasksForDay(dateStr)); 
+                        } 
+                        if (new Date().getDate() === dayCounter && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear) { 
+                            dayEl.classList.add('today'); 
+                        } 
+                        dayCounter++; 
                     } 
-                    if (new Date().getDate() === dayCounter && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear) { 
-                        dayEl.classList.add('today'); 
-                    } 
-                    dayCounter++; 
+                    row.appendChild(dayEl); 
                 } 
-                currentRow.appendChild(dayEl); 
-        
-                // Move to the next row if it's the end of a week 
-                if ((i + 1) % 7 === 0) { 
-                    currentRow = document.createElement('div'); 
-                    currentRow.classList.add('calendar-row'); 
-                    calendarGrid.appendChild(currentRow); 
-                } 
+                calendarEl.appendChild(row); 
+                dayOfWeek = 0; // Reset dayOfWeek for subsequent weeks 
             } 
-        
-            calendarEl.appendChild(calendarGrid); 
         },
         
         changeMonth: function(diff) { 
