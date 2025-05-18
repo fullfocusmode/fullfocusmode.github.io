@@ -546,7 +546,7 @@ body.dark-theme {
 }
 
 .settings-section button.danger {
-    background-color: #f44336;
+    background-color: var(--danger);
 }
 
 /* Task detail modal */
