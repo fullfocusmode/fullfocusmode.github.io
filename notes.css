@@ -1,0 +1,91 @@
+/* ... (Existing styles from styles.css) ... */ 
+
+.notes-container { 
+    display: flex; 
+    height: calc(100vh - 60px - 20px - 20px); /* Adjust for topbar and padding */ 
+} 
+
+.notes-list-container { 
+    width: 300px; 
+    overflow-y: auto; 
+    border-right: 1px solid #ddd; 
+    padding-right: 20px; 
+} 
+
+.notes-list { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+} 
+
+.note-item { 
+    background-color: var(--card-bg); 
+    padding: 10px; 
+    border-radius: var(--border-radius); 
+    cursor: pointer; 
+    transition: var(--transition); 
+    border-left: 4px solid transparent; 
+} 
+
+.note-item.active { 
+    border-left-color: var(--primary-color); 
+} 
+
+.note-item-title { 
+    font-weight: 500; 
+    margin-bottom: 5px; 
+} 
+
+.note-item-date { 
+    font-size: 0.8rem; 
+    color: var(--text-light); 
+} 
+
+.notes-editor-container { 
+    flex-grow: 1; 
+    padding: 20px; 
+} 
+
+.notes-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 15px; 
+} 
+
+.note-colors { 
+    margin-right: 10px; 
+} 
+
+#note-color { 
+    width: 30px; 
+    height: 30px; 
+} 
+
+.notes-actions { 
+    display: flex; 
+    gap: 10px; 
+} 
+
+#editor-container { 
+    height: calc(100% - 80px); /* Adjust for header height */ 
+} 
+
+.ql-editor { 
+    height: 100%; 
+} 
+
+.ql-container { 
+    height: 100%; 
+} 
+
+.empty-message { 
+    text-align: center; 
+    padding: 20px; 
+    color: var(--text-light); 
+} 
+
+.emoji-mart { 
+    position: absolute; 
+    z-index: 1000; 
+}
