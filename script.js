@@ -1066,12 +1066,6 @@ function closeCurrentModal() {
         modal.style.display = 'none';
     });
 }
-    
-document.addEventListener('DOMContentLoaded', function() { 
-    TaskManager.init(); 
-    setupTaskListeners(); 
-    setupNoteListeners(); 
-}); 
 
 function setupNoteListeners() { 
     const newNoteButton = document.getElementById('new-note-btn'); 
@@ -1102,3 +1096,9 @@ function setupNoteListeners() {
         } 
     }); 
 }
+
+document.addEventListener('DOMContentLoaded', function() { 
+    TaskManager.init(); 
+    setupTaskListeners(); 
+    setupNoteListeners(); 
+}); 
