@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const newMonth = currentMonth + 1; 
             window.history.pushState({}, '', `?month=${newMonth}&year=${currentYear}`); 
             this.renderCalendar(); 
-        }
+        },
         
         showTaskDetails: function(taskId) {
             const task = this.tasks.find(t => t.id === taskId);
