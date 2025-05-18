@@ -824,4 +824,5 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize
     setupEventListeners();
     TaskManager.init();
+    TaskManager.renderCalendar();  
 });
