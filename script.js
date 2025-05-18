@@ -294,38 +294,47 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!calendarEl) return; 
         
             const today = new Date(); 
-            const currentMonth = today.getMonth(); 
-            const currentYear = today.getFullYear(); 
+            let currentMonth = today.getMonth(); 
+            let currentYear = today.getFullYear(); 
+        
+            // Get month and year from URL parameters if available 
+            const urlParams = new URLSearchParams(window.location.search); 
+            if (urlParams.has('month')) { 
+                currentMonth = parseInt(urlParams.get('month')) - 1; // Adjust to 0-indexed month 
+            } 
+            if (urlParams.has('year')) { 
+                currentYear = parseInt(urlParams.get('year')); 
+            } 
         
             calendarEl.innerHTML = ''; 
         
             // Create calendar header 
             const headerEl = document.createElement('div'); 
             headerEl.classList.add('calendar-header'); 
-            
-            const navEl = document.createElement('div');
-            navEl.classList.add('calendar-nav');
-            
-            const prevBtn = document.createElement('button');
-            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-            prevBtn.addEventListener('click', () => this.changeMonth(-1));
-            
-            const nextBtn = document.createElement('button');
-            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-            nextBtn.addEventListener('click', () => this.changeMonth(1));
-            
-            const monthYearEl = document.createElement('div');
-            monthYearEl.classList.add('calendar-month-year');
-            monthYearEl.textContent = this.getMonthName(currentMonth) + ' ' + currentYear;
-            
-            navEl.appendChild(prevBtn);
-            navEl.appendChild(nextBtn);
-            
-            headerEl.appendChild(monthYearEl);
-            headerEl.appendChild(navEl);
-            
+        
+            const navEl = document.createElement('div'); 
+            navEl.classList.add('calendar-nav'); 
+        
+            const prevBtn = document.createElement('button'); 
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>'; 
+            prevBtn.addEventListener('click', () => this.changeMonth(-1)); 
+        
+            const nextBtn = document.createElement('button'); 
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>'; 
+            nextBtn.addEventListener('click', () => this.changeMonth(1)); 
+        
+            const monthYearEl = document.createElement('div'); 
+            monthYearEl.classList.add('calendar-month-year'); 
+            monthYearEl.textContent = this.getMonthName(currentMonth) + ' ' + currentYear; 
+        
+            navEl.appendChild(prevBtn); 
+            navEl.appendChild(nextBtn); 
+        
+            headerEl.appendChild(monthYearEl); 
+            headerEl.appendChild(navEl); 
+        
             calendarEl.appendChild(headerEl); 
-
+        
             // Create weekday headers 
             const weekdaysEl = document.createElement('div'); 
             weekdaysEl.classList.add('calendar-weekdays'); 
@@ -352,37 +361,68 @@ document.addEventListener('DOMContentLoaded', function() {
             const calendarGrid = document.createElement('div'); 
             calendarGrid.classList.add('calendar-grid'); 
         
-            // Add empty cells before the first day of the month 
-            for (let i = 0; i < firstDay; i++) { 
-                const emptyCell = document.createElement('div'); 
-                emptyCell.classList.add('calendar-day', 'empty'); 
-                calendarGrid.appendChild(emptyCell); 
-            } 
+            let dayCounter = 1; 
+            // Add days to the grid, handling rows correctly 
+            for (let i = 0; i < 6; i++) { // Maximum 6 weeks 
+                const row = document.createElement('div'); 
+                row.classList.add('calendar-row'); 
+                for (let j = 0; j < 7; j++) { 
+                    const dayEl = document.createElement('div'); 
+                    dayEl.classList.add('calendar-day'); 
         
-            // Add days of the month 
-            for (let day = 1; day <= lastDay; day++) { 
-                const dayEl = document.createElement('div'); 
-                dayEl.classList.add('calendar-day'); 
-                dayEl.textContent = day; 
+                    if (i === 0 && j < firstDay) { 
+                        dayEl.classList.add('empty'); 
+                    } else if (dayCounter <= lastDay) { 
+                        const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${dayCounter.toString().padStart(2, '0')}`; 
+                        const date = new Date(dateStr); 
+                        const dayOfWeek = date.toLocaleDateString(undefined, { weekday: 'short' }); // Get short weekday name 
         
-                const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`; 
-                if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
-                    dayEl.classList.add('has-tasks'); 
-                    dayEl.addEventListener('click', () => this.showTasksForDay(dateStr)); 
+                        dayEl.textContent = dayCounter; 
+                        dayEl.dataset.dayOfWeek = dayOfWeek; // Store day of week for later use (optional) 
+        
+                        if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
+                            dayEl.classList.add('has-tasks'); 
+                            dayEl.addEventListener('click', () => this.showTasksForDay(dateStr)); 
+                        } 
+                        if (new Date().getDate() === dayCounter && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear) { 
+                            dayEl.classList.add('today'); 
+                        } 
+                        dayCounter++; 
+                    } else { 
+                        dayEl.classList.add('empty'); 
+                    } 
+                    row.appendChild(dayEl); 
                 } 
-                if (new Date().getDate() === day && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear) { 
-                    dayEl.classList.add('today'); 
-                } 
-                calendarGrid.appendChild(dayEl); 
+                calendarGrid.appendChild(row); 
             } 
         
             calendarEl.appendChild(calendarGrid); 
         },
         
         changeMonth: function(diff) { 
-            const date = new Date(); 
-            date.setMonth(date.getMonth() + diff); 
-            this.renderCalendar(); // Call renderCalendar to update the view 
+            const currentDate = new Date(); 
+            let currentMonth = currentDate.getMonth(); 
+            let currentYear = currentDate.getFullYear(); 
+        
+            // Get month and year from URL parameters if available (for initial load) 
+            const urlParams = new URLSearchParams(window.location.search); 
+            if (urlParams.has('month')) { 
+                currentMonth = parseInt(urlParams.get('month')) - 1; 
+            } 
+            if (urlParams.has('year')) { 
+                currentYear = parseInt(urlParams.get('year')); 
+            } 
+        
+            // Adjust month and year based on the diff 
+            const newDate = new Date(currentYear, currentMonth + diff, 1); // Start of the new month 
+            currentMonth = newDate.getMonth(); 
+            currentYear = newDate.getFullYear(); 
+        
+            // Update URL to reflect the new month and year 
+            const newMonth = currentMonth + 1; // Adjust to 1-indexed month for URL 
+            window.history.pushState({}, '', `?month=${newMonth}&year=${currentYear}`); 
+        
+            this.renderCalendar(); 
         },
         
         getMonthName: function(month) {
