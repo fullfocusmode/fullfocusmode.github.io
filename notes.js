@@ -43,19 +43,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 
         createNoteElement: function(note) { 
             const noteItem = document.createElement('div'); 
-            noteItem.classList.add('note-item', note.color.replace('#', '')); // Add color class 
+            noteItem.classList.add('note-item', note.color.replace('#', '')); 
             noteItem.dataset.id = note.id; 
             noteItem.innerHTML = ` 
                 <div class="note-title">${note.title} <span class="note-word-count">${this.getWordCount(note.content)}</span></div> 
                 <div class="note-content">${note.content}</div> 
             `; 
-
             noteItem.addEventListener('click', () => { 
                 this.showNoteDetails(note.id); 
             }); 
             return noteItem; 
         }, 
-        getWordCount: function(text) { 
+
+        getWordCount: function(html) { 
+            //Improved word count for HTML content 
+            const text = html.replace(/<[^>]+>/g, ' ').toLowerCase(); 
             return text.trim().split(/\s+/).length; 
         }, 
         showNoteDetails: function(noteId) { 
@@ -71,14 +73,21 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('new-note-btn').addEventListener('click', () => openModal('new-note-modal')); 
             document.getElementById('new-note-form').addEventListener('submit', (e) => { 
                 e.preventDefault(); 
+                const quill = new Quill('#note-editor', { 
+                    modules: { 
+                        toolbar: true // Add a toolbar 
+                    }, 
+                    theme: 'snow' 
+                }); 
                 const noteData = { 
                     title: document.getElementById('note-title').value, 
-                    content: document.getElementById('note-content').value, 
+                    content: quill.root.innerHTML, // Get HTML content from Quill 
                     color: document.getElementById('note-color').value 
                 }; 
                 this.addNote(noteData); 
                 closeCurrentModal(); 
                 document.getElementById('new-note-form').reset(); 
+                quill.setText(''); // Clear the editor 
             }); 
         } 
     }; 
