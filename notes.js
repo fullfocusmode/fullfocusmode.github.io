@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('fullfocus_notes', JSON.stringify(this.notes)); 
             this.renderNotesList(); 
             this.renderNotesCount(); 
-        }, 
+        },  
 
         setupEditor: function() { 
             const toolbarOptions = [ 
@@ -30,14 +30,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 [{ 'color': [] }, { 'background': [] }], 
                 [{ 'list': 'ordered' }, { 'list': 'bullet' }], 
                 ['link', 'image', 'code', 'clean'], 
-                ['emoji'] 
+                ['emoji'], 
+                [{ 'font': [] }], 
+                [{ 'size': ['small', false, 'large', 'huge'] }], 
+                [{ 'align': [] }], 
+                ['clean'], 
+                ['blockquote', 'code-block'], 
+                ['script', 'direction'], 
+                ['formula'], 
+                ['video'], 
+                ['hr'] // Horizontal rule 
             ]; 
 
             this.quill = new Quill('#editor-container', { 
                 modules: { 
                     toolbar: toolbarOptions, 
                     emoji: true, 
-                    // Add other modules as needed (e.g., for horizontal lines) 
+                    formula: true, // Enable the formula module 
                 }, 
                 placeholder: 'Start writing here...', 
                 theme: 'snow' 
@@ -45,10 +54,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
             this.quill.on('text-change', () => { 
                 this.updateWordCount(); 
+                this.renderMath(); // Render math formulas after changes 
             }); 
 
             this.addEmojiPicker(); 
             this.disableEditor(); 
+
+            // Handle video insertion 
+            this.quill.getModule('toolbar').addHandler('video', () => { 
+                const videoUrl = prompt("Enter the video URL:"); 
+                if (videoUrl) { 
+                    this.quill.insertEmbed(this.quill.getSelection().index, 'video', videoUrl); 
+                } 
+            }); 
+
+            // Handle horizontal rule insertion 
+            this.quill.getModule('toolbar').addHandler('hr', () => { 
+                this.quill.insertHTML('<hr>'); 
+            }); 
+
+            // Render math formulas on initial load 
+            this.renderMath(); 
+        }, 
+
+        renderMath: function() { 
+            renderMathInElement(document.querySelector('.ql-editor')); 
         }, 
 
         addEmojiPicker: function() { 
@@ -265,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 noteEl.addEventListener('click', () => this.loadNote(note.id)); 
                 notesListEl.appendChild(noteEl); 
             }); 
-        } 
+        }
     }; 
 
     // UI event handlers for notes 
