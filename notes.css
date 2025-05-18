@@ -89,3 +89,19 @@
     position: absolute; 
     z-index: 1000; 
 }
+
+#new-task-btn {
+    padding: 8px 15px;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+#new-task-btn i {
+    margin-right: 5px;
+}
