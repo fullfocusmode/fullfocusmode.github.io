@@ -294,108 +294,81 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!calendarEl) return; 
         
             const today = new Date(); 
-            let currentMonth = today.getMonth(); 
-            let currentYear = today.getFullYear(); 
+            let year = today.getFullYear(); 
+            let month = today.getMonth(); 
         
+            // Handle URL parameters for month and year 
             const urlParams = new URLSearchParams(window.location.search); 
             if (urlParams.has('month')) { 
-                currentMonth = parseInt(urlParams.get('month')) - 1; 
+                month = parseInt(urlParams.get('month')) - 1; 
             } 
             if (urlParams.has('year')) { 
-                currentYear = parseInt(urlParams.get('year')); 
+                year = parseInt(urlParams.get('year')); 
             } 
         
-            calendarEl.innerHTML = ''; 
+            calendarEl.innerHTML = ''; // Clear existing calendar 
         
-            // Create calendar header 
-            const headerEl = document.createElement('div'); 
-            headerEl.classList.add('calendar-header'); 
-            const headerTitle = document.createElement('h2'); 
-            headerTitle.textContent = 'Calendar'; 
-            headerEl.appendChild(headerTitle); 
+            // Create header 
+            const header = document.createElement('div'); 
+            header.classList.add('calendar-header'); 
+            const title = document.createElement('h2'); 
+            title.textContent = 'Calendar'; 
+            header.appendChild(title); 
+            const monthYear = document.createElement('div'); 
+            monthYear.textContent = `${this.getMonthName(month)} ${year}`; 
+            header.appendChild(monthYear); 
+            calendarEl.appendChild(header); 
         
-            const monthYearNav = document.createElement('div'); 
-            monthYearNav.classList.add('month-year-nav'); 
-            const monthYearEl = document.createElement('span'); 
-            monthYearEl.textContent = `${this.getMonthName(currentMonth)} ${currentYear}`; 
-            const prevBtn = document.createElement('button'); 
-            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>'; 
-            prevBtn.addEventListener('click', () => this.changeMonth(-1)); 
-            const nextBtn = document.createElement('button'); 
-            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>'; 
-            nextBtn.addEventListener('click', () => this.changeMonth(1)); 
-        
-            monthYearNav.appendChild(prevBtn); 
-            monthYearNav.appendChild(monthYearEl); 
-            monthYearNav.appendChild(nextBtn); 
-            headerEl.appendChild(monthYearNav); 
-            calendarEl.appendChild(headerEl); 
-        
-            // Weekday headers 
-            const weekdaysEl = document.createElement('div'); 
-            weekdaysEl.classList.add('calendar-weekdays'); 
+            // Create weekday row 
             const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; 
+            const weekdayRow = document.createElement('div'); 
+            weekdayRow.classList.add('calendar-weekdays'); 
             weekdays.forEach(day => { 
-                const dayEl = document.createElement('div'); 
-                dayEl.textContent = day; 
-                weekdaysEl.appendChild(dayEl); 
+                const dayCell = document.createElement('div'); 
+                dayCell.textContent = day; 
+                weekdayRow.appendChild(dayCell); 
             }); 
-            calendarEl.appendChild(weekdaysEl); 
+            calendarEl.appendChild(weekdayRow); 
         
-            const firstDay = (new Date(currentYear, currentMonth, 1)).getDay(); 
-            const lastDay = (new Date(currentYear, currentMonth + 1, 0)).getDate(); 
+            // Create days 
+            const firstDayOfMonth = (new Date(year, month, 1)).getDay(); 
+            const lastDayOfMonth = new Date(year, month + 1, 0).getDate(); 
+            let day = 1; 
         
-            const tasksByDate = {}; 
-            this.tasks.filter(task => task.type === 'categorized').forEach(task => { 
-                if (task.date) { 
-                    const dateStr = task.date.split('T')[0]; 
-                    tasksByDate[dateStr] = tasksByDate[dateStr] || []; 
-                    tasksByDate[dateStr].push(task); 
-                } 
-            }); 
+            for (let week = 0; week < 6; week++) { // Maximum 6 weeks 
+                const weekRow = document.createElement('div'); 
+                weekRow.classList.add('calendar-row'); 
         
-            let dayCounter = 1; 
-            let dayOfWeek = firstDay; // Start with the day of the week for the 1st 
+                for (let i = 0; i < 7; i++) { 
+                    const dayCell = document.createElement('div'); 
+                    dayCell.classList.add('calendar-day'); 
         
-            // Create rows dynamically 
-            for (let week = 0; week < 6; week++) { // Max 6 weeks 
-                const row = document.createElement('div'); 
-                row.classList.add('calendar-row'); 
-        
-                for (let day = 0; day < 7; day++) { 
-                    const dayEl = document.createElement('div'); 
-                    dayEl.classList.add('calendar-day'); 
-        
-                    if (day < dayOfWeek && week === 0 || dayCounter > lastDay) { 
-                        dayEl.classList.add('empty'); 
+                    if (week === 0 && i < firstDayOfMonth || day > lastDayOfMonth) { 
+                        dayCell.classList.add('empty'); 
                     } else { 
-                        const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${dayCounter.toString().padStart(2, '0')}`; 
-                        const date = new Date(dateStr); 
-                        dayEl.textContent = dayCounter; 
-                        dayEl.dataset.dayOfWeek = date.toLocaleDateString(undefined, { weekday: 'short' }); 
-        
-                        if (tasksByDate[dateStr] && tasksByDate[dateStr].length > 0) { 
-                            dayEl.classList.add('has-tasks'); 
-                            dayEl.addEventListener('click', () => this.showTasksForDay(dateStr)); 
-                        } 
-                        if (new Date().getDate() === dayCounter && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear) { 
-                            dayEl.classList.add('today'); 
-                        } 
-                        dayCounter++; 
+                        dayCell.textContent = day; 
+                        day++; 
+                        // Add event listener for task display (if needed) 
+                        // dayCell.addEventListener('click', () => this.showTasksForDay(day)); 
                     } 
-                    row.appendChild(dayEl); 
+                    weekRow.appendChild(dayCell); 
                 } 
-                calendarEl.appendChild(row); 
-                dayOfWeek = 0; // Reset dayOfWeek for subsequent weeks 
+                calendarEl.appendChild(weekRow); 
             } 
-        },
+        }, 
+        
+        getMonthName: function(monthIndex) { 
+            const monthNames = ["January", "February", "March", "April", "May", "June", 
+                "July", "August", "September", "October", "November", "December" 
+            ]; 
+            return monthNames[monthIndex]; 
+        }, 
         
         changeMonth: function(diff) { 
             const currentDate = new Date(); 
             let currentMonth = currentDate.getMonth(); 
             let currentYear = currentDate.getFullYear(); 
         
-            // Get month and year from URL parameters if available (for initial load) 
             const urlParams = new URLSearchParams(window.location.search); 
             if (urlParams.has('month')) { 
                 currentMonth = parseInt(urlParams.get('month')) - 1; 
@@ -404,22 +377,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentYear = parseInt(urlParams.get('year')); 
             } 
         
-            // Adjust month and year based on the diff 
-            const newDate = new Date(currentYear, currentMonth + diff, 1); // Start of the new month 
+            const newDate = new Date(currentYear, currentMonth + diff, 1); 
             currentMonth = newDate.getMonth(); 
             currentYear = newDate.getFullYear(); 
         
-            // Update URL to reflect the new month and year 
-            const newMonth = currentMonth + 1; // Adjust to 1-indexed month for URL 
+            const newMonth = currentMonth + 1; 
             window.history.pushState({}, '', `?month=${newMonth}&year=${currentYear}`); 
-        
             this.renderCalendar(); 
-        },
-        
-        getMonthName: function(month) {
-            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            return months[month];
-        },
+        }
         
         showTaskDetails: function(taskId) {
             const task = this.tasks.find(t => t.id === taskId);
